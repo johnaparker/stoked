@@ -27,7 +27,7 @@ def gaussian_example():
     ax.set_aspect('equal')
 
     history = np.zeros([Nsteps,3], dtype=float)
-    sim = brownian_dynamics(position, partial(gaussian_force), damping, temperature, dt)
+    sim = brownian_dynamics(position, damping, temperature, dt, force=partial(gaussian_force))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

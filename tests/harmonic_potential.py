@@ -20,9 +20,9 @@ def harmonic_example():
         history = np.zeros([Nsteps,3], dtype=float)
 
         if Fext is no_force:
-            sim = brownian_dynamics(position, Fext, damping, temperature, dt)
+            sim = brownian_dynamics(position, damping, temperature, dt, force=Fext)
         else:
-            sim = brownian_dynamics(position, partial(Fext, k=.01), damping, temperature, dt)
+            sim = brownian_dynamics(position, damping, temperature, dt, force=partial(Fext, k=.01))
 
         for i in tqdm(range(Nsteps)):
             history[i] = sim.position.squeeze()

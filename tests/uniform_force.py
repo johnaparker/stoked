@@ -19,7 +19,7 @@ def test_uniform_motion():
 
     history = np.zeros([Nsteps,3], dtype=float)
     velocity = np.zeros([Nsteps,3], dtype=float)
-    sim = brownian_dynamics(position, partial(uniform_force, Fx=Fx), damping, temperature, dt)
+    sim = brownian_dynamics(position, damping, temperature, dt, force=partial(uniform_force, Fx=Fx))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

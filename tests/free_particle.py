@@ -17,7 +17,7 @@ def harmonic_example():
 
     history = np.zeros([Nsteps,3], dtype=float)
 
-        sim = brownian_dynamics(position, no_force, damping, temperature, dt)
+        sim = brownian_dynamics(position, damping, temperature, dt, force=no_force)
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()
