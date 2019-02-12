@@ -2,24 +2,24 @@ import numpy as np
 from scipy.constants import k as kb
 
 class brownian_dynamics:
-    def __init__(self, position, Fext, damping, temperature, dt):
+    def __init__(self, position, Fext, drag, temperature, dt):
         """
         Arguments:
             position[N,3]    initial position of N particles
             Fext(t, r)       external force given time t, position r[N,3] and returns force F[N,3]
-            damping          damping coefficient (F = -(damping)*(velocity))
+            drag             drag coefficient (F = -(drag)*(velocity))
             temperature      system temperature
             dt               time-step
         """
         self.position = np.asarray(position)
         self.Fext = Fext
-        self.damping = damping
+        self.drag = drag
         self.temperature = temperature
         self.dt = dt
         self.time = 0
 
-        self.alpha = 1/self.damping
-        self.beta = np.sqrt(2*kb*self.temperature/(dt*self.damping))
+        self.alpha = 1/self.drag
+        self.beta = np.sqrt(2*kb*self.temperature/(dt*self.drag))
 
         self.velocity = np.zeros_like(position)
 
