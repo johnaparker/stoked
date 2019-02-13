@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.constants import k as kb
+from collections.abc import Iterable
 
 class brownian_dynamics:
     def __init__(self, position, drag, temperature, dt, force=None, torque=None):
@@ -19,12 +20,16 @@ class brownian_dynamics:
         self.time = 0
 
         if force is None:
-            self.force = lambda t, rvec: np.zeros_like(rvec)
+            self.force = [lambda t, rvec: np.zeros_like(rvec)]
+        elif not isinstance(force, Iterable):
+            self.force = [force]
         else:
             self.force = force
 
         if torque is None:
-            self.torque = lambda t, rvec: np.zeros_like(rvec)
+            self.torque = [lambda t, rvec: np.zeros_like(rvec)]
+        elif not isinstance(force, Iterable):
+            self.torque = [torque]
         else:
             self.torque = torque
 
@@ -45,13 +50,13 @@ class brownian_dynamics:
         """
         Time-step the positions by dt
         """
-        F = self.force(self.time, self.position)
+        F = sum((force(self.time, self.position) for force in self.force))
         noise = np.random.normal(size=self.position.shape) 
         v1 = (self.alpha*F + self.beta*noise)
         r_predict = self.position + self.dt*v1
         self.time += self.dt
 
-        F_predict = self.force(self.time, r_predict)
+        F_predict = sum((force(self.time, r_predict) for force in self.force))
         v2 = (self.alpha*F_predict + self.beta*noise)
         self.velocity = 0.5*(v1 + v2)
         self.position = self.position + 0.5*self.dt*(v1 + v2)
