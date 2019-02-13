@@ -28,8 +28,16 @@ class brownian_dynamics:
         else:
             self.torque = torque
 
-        self.alpha = 1/self.drag
-        self.beta = np.sqrt(2*kb*self.temperature/(dt*self.drag))
+        self.alpha = np.zeros_like(self.position)
+        self.beta = np.zeros_like(self.position)
+
+        if drag.ndim == 1:
+            drag_s = self.drag[:,np.newaxis]
+        else:
+            drag_s = self.drag
+
+        self.alpha[...] = 1/drag_s
+        self.beta[...] = np.sqrt(2*kb*self.temperature/(dt*drag_s))
 
         self.velocity = np.zeros_like(position)
 
