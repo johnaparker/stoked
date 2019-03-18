@@ -1,62 +1,186 @@
 import numpy as np
 from scipy.constants import k as kb
 from collections.abc import Iterable
+import quaternion
+from abc import ABCMeta, abstractmethod
+
+class interactions:
+    """
+    Abstract base class for particle interactions
+    """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def force(self):
+        """
+        Return the force[N,3] based on the current state
+        """
+        pass
+
+    @abstractmethod
+    def torque(self):
+        """
+        Return the torque[N,3] based on the current state
+        """
+        pass
+    
+    @abstractmethod
+    def update(self):
+        """
+        Update the current state
+        """
+        pass
+
+    def _update(self, time, position, orientation):
+        self.time = time
+        self.position = position
+        self.orientation = orientation
+        self.update()
 
 class brownian_dynamics:
-    def __init__(self, position, drag, temperature, dt, force=None, torque=None):
+    """
+    Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
+    """
+    def __init__(self, *, temperature, dt, position, drag_T, orientation=None, drag_R=None, 
+                 force=None, torque=None, interactions=None):
         """
         Arguments:
-            position[N,3]    initial position of N particles
-            drag             drag coefficient (F = -(drag)*(velocity))
-            temperature      system temperature
-            dt               time-step
-            force(t, r)      external force function given time t, position r[N,3] and returns force F[N,3]
-            torque(t, r)      external torque function given time t, position r[N,3] and returns torque T[N,3]
+            temperature        system temperature
+            dt                 time-step
+            position[N,3]      initial position of N particles
+            drag_T             translational drag coefficients (F = -(drag_T)*(velocity))
+            orientation[N]     initial orientation of N particles (as quaternions)
+            drag_R             rotational drag coefficients (T = -(drag_R)*(angular_velocity))
+            force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
+            torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
+            interactions       particle interactions (can be a list)
         """
-        self.position = np.asarray(position)
-        self.drag = drag
         self.temperature = temperature
         self.dt = dt
         self.time = 0
+        self.position = np.asarray(position, dtype=float)
+        self.drag_T = np.asarray(drag_T, dtype=float)
+
+        if None not in [orientation, drag_R]:
+            self.orientation = np.asarray(orientation, dtype=np.quaternion)
+            self.drag_R = drag_R
+        elif orientation is None and drag_R is None:
+            self.orientation = None
+            self.drag_R = None
+            self.drag_R = np.asarray(drag_T, dtype=float)
+        else:
+            raise ValueError('Orientation and drag_R must both be set for rotational dynamics')
 
         if force is None:
-            self.force = [lambda t, rvec: np.zeros_like(rvec)]
+            self.force = [lambda t, rvec, orient: np.zeros_like(rvec)]
         elif not isinstance(force, Iterable):
             self.force = [force]
         else:
             self.force = force
 
         if torque is None:
-            self.torque = [lambda t, rvec: np.zeros_like(rvec)]
+            self.torque = [lambda t, rvec, orient: np.zeros_like(rvec)]
         elif not isinstance(force, Iterable):
             self.torque = [torque]
         else:
             self.torque = torque
 
-        self.alpha = np.zeros_like(self.position)
-        self.beta = np.zeros_like(self.position)
-
-        if drag.ndim == 1:
-            drag_s = self.drag[:,np.newaxis]
+        if interactions is None:
+            self.interactions = None
+        elif not isinstance(interactions, Iterable):
+            self.interactions = [interactions]
         else:
-            drag_s = self.drag
+            self.interactions = interactions
 
-        self.alpha[...] = 1/drag_s
-        self.beta[...] = np.sqrt(2*kb*self.temperature/(dt*drag_s))
+        self.alpha_T = np.zeros_like(self.position)
+        self.beta_T = np.zeros_like(self.position)
 
+        if self.drag_T.ndim == 1:
+            drag_Ts = self.drag_T[:,np.newaxis]
+        else:
+            drag_Ts = self.drag_T
+
+        self.alpha_T[...] = 1/drag_Ts
+        self.beta_T[...] = np.sqrt(2*kb*self.temperature/(dt*drag_Ts))
+        print(self.beta_T)
         self.velocity = np.zeros_like(position)
+
+        if self.orientation is not None:
+            self.alpha_R = np.zeros_like(self.position)
+            self.beta_R = np.zeros_like(self.position)
+
+            if self.drag_R.ndim == 1:
+                drag_Rs = self.drag_R[:,np.newaxis]
+            else:
+                drag_Rs = self.drag_R
+
+            self.alpha_R[...] = 1/drag_Rs
+            self.beta_R[...] = np.sqrt(2*kb*self.temperature/(dt*drag_Rs))
+
+            self.angular_velocity = np.zeros_like(position)
 
     def step(self):
         """
-        Time-step the positions by dt
+        Time-step the positions (and orientations) by dt
         """
-        F = sum((force(self.time, self.position) for force in self.force))
-        noise = np.random.normal(size=self.position.shape) 
-        v1 = (self.alpha*F + self.beta*noise)
+        self._update_interactions(self.time, self.position, self.orientation)
+
+        F = self._total_force(self.time, self.position, self.orientation)
+        noise_T = np.random.normal(size=self.position.shape) 
+        v1 = (self.alpha_T*F + self.beta_T*noise_T)
         r_predict = self.position + self.dt*v1
+
+        if self.orientation is not None:
+            T = self._total_torque(self.time, self.position, self.orientation)
+            noise_R = np.random.normal(size=self.position.shape) 
+            w1 = (self.alpha_R*T + self.beta_R*noise_R)
+            o_predict = (1 + w1*self.dt/2)*self.orientation
+
         self.time += self.dt
 
-        F_predict = sum((force(self.time, r_predict) for force in self.force))
-        v2 = (self.alpha*F_predict + self.beta*noise)
+        F_predict =  self._total_force(self.time, r_predict, None)
+        v2 = (self.alpha_T*F_predict + self.beta_T*noise_T)
         self.velocity = 0.5*(v1 + v2)
         self.position = self.position + 0.5*self.dt*(v1 + v2)
+
+        if self.orientation is not None:
+            T_predict =  self._total_torque(self.time, r_predict, None)
+            w2 = (self.alpha_R*T_predict + self.beta_R*noise_R)
+            self.angular_velocity = 0.5*(w1 + w2)
+            self.orientation = (1 + (w1 + w2)*self.dt/4)
+
+            self.orientation = np.normalized(self.orientation)
+
+    def _update_interactions(self, time, position, orientation):
+        """
+        FOR INTERNAL USE ONLY
+
+        update the interactions given a new (or predicted) position and orientation
+        """
+        if self.interactions is not None:
+            for I in self.interactions:
+                I._update(time, position, orientation)
+
+    def _total_force(self, time, position, orientation):
+        """
+        FOR INTERNAL USE ONLY
+
+        return the total force at a given time, position, and orientation
+        """
+        F = sum((force(time, position, orientation) for force in self.force))
+        if self.interactions is not None:
+            for I in self.interactions:
+                F += I.force()
+        return F
+
+    def _total_torque(self, time, position, orientation):
+        """
+        FOR INTERNAL USE ONLY
+
+        return the total torque at a given time, position, and orientation
+        """
+        T = sum((torque(time, position, orientation) for torque in self.torque))
+        if self.interactions is not None:
+            for I in self.interactions:
+                T += I.torque()
+        return T

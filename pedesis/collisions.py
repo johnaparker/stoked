@@ -1,27 +1,34 @@
 import numpy as np
+from pedesis import interactions
 
-def hard_sphere_collisions(radii, kn):
-    def force(t, rvec):
-        F = np.zeros_like(rvec)
-        Nparticles = len(rvec)
+class hard_sphere_collisions(interactions):
+    def __init__(self, radii, kn):
+        # self.radii = pedesis.array(radii)
+        self.radii = radii
+        self.kn = kn
 
-        if np.isscalar(radii):
-            rad = np.full(Nparticles, radii, dtype=float)
+    def force(self):
+        Nparticles = len(self.position)
+        if np.isscalar(self.radii):
+            rad = np.full(Nparticles, self.radii, dtype=float)
         else:
-            rad = radii
+            rad = np.asarray(self.radii, dtype=float)
+
+        F = np.zeros_like(self.position)
 
         for i in range(0,Nparticles):
             for j in range(i+1,Nparticles):
-                d = rvec[i] - rvec[j]
+                d = self.position[i] - self.position[j]
                 r = np.linalg.norm(d)
                 if r < rad[i] + rad[j]:
                     overlap = abs(r - rad[i] + rad[j])
 
                     r_hat = d/r
-                    Fn = r_hat*kn*overlap**1.5
+                    Fn = r_hat*self.kn*overlap**1.5
 
                     F[i] += Fn
                     F[j] -= Fn
         return F
 
-    return force
+    def torque(self):
+        return np.zeros_like(self.position)
