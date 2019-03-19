@@ -41,16 +41,15 @@ class brownian_dynamics:
     """
     Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
     """
-    def __init__(self, *, temperature, dt, position, drag_T, orientation=None, drag_R=None, 
+    def __init__(self, *, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None):
         """
         Arguments:
             temperature        system temperature
             dt                 time-step
             position[N,3]      initial position of N particles
-            drag_T             translational drag coefficients (F = -(drag_T)*(velocity))
+            drag               drag coefficients (of base type pedesis.drag)
             orientation[N]     initial orientation of N particles (as quaternions)
-            drag_R             rotational drag coefficients (T = -(drag_R)*(angular_velocity))
             force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
             torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
             interactions       particle interactions (can be a list)
@@ -58,18 +57,13 @@ class brownian_dynamics:
         self.temperature = temperature
         self.dt = dt
         self.time = 0
-        self.position = np.asarray(position, dtype=float)
-        self.drag_T = np.asarray(drag_T, dtype=float)
+        self.position = np.atleast_2d(np.asarray(position, dtype=float))
+        self.drag = drag
 
-        if None not in [orientation, drag_R]:
+        if orientation is not None:
             self.orientation = np.asarray(orientation, dtype=np.quaternion)
-            self.drag_R = drag_R
-        elif orientation is None and drag_R is None:
-            self.orientation = None
-            self.drag_R = None
-            self.drag_R = np.asarray(drag_T, dtype=float)
         else:
-            raise ValueError('Orientation and drag_R must both be set for rotational dynamics')
+            self.orientation = None
 
         if force is None:
             self.force = [lambda t, rvec, orient: np.zeros_like(rvec)]
@@ -95,29 +89,26 @@ class brownian_dynamics:
         self.alpha_T = np.zeros_like(self.position)
         self.beta_T = np.zeros_like(self.position)
 
-        if self.drag_T.ndim == 1:
-            drag_Ts = self.drag_T[:,np.newaxis]
-        else:
-            drag_Ts = self.drag_T
+        drag_T = self.drag.drag_T
+        if self.drag.isotropic and not np.isscalar(drag_T):
+            drag_T = drag_T[:,np.newaxis]
 
-        self.alpha_T[...] = 1/drag_Ts
-        self.beta_T[...] = np.sqrt(2*kb*self.temperature/(dt*drag_Ts))
-        print(self.beta_T)
-        self.velocity = np.zeros_like(position)
+        self.alpha_T[...] = 1/drag_T
+        self.beta_T[...] = np.sqrt(2*kb*self.temperature/(dt*drag_T))
+        self.velocity = np.zeros_like(self.position)
 
         if self.orientation is not None:
             self.alpha_R = np.zeros_like(self.position)
             self.beta_R = np.zeros_like(self.position)
 
-            if self.drag_R.ndim == 1:
-                drag_Rs = self.drag_R[:,np.newaxis]
-            else:
-                drag_Rs = self.drag_R
+            drag_R = self.drag.drag_R
+            if self.drag.isotropic and not np.isscalar(drag_R):
+                drag_R = drag_R[:,np.newaxis]
 
             self.alpha_R[...] = 1/drag_Rs
             self.beta_R[...] = np.sqrt(2*kb*self.temperature/(dt*drag_Rs))
 
-            self.angular_velocity = np.zeros_like(position)
+            self.angular_velocity = np.zeros_like(self.position)
 
     def step(self):
         """
