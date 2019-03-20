@@ -31,10 +31,11 @@ class interactions:
         """
         pass
 
-    def _update(self, time, position, orientation):
+    def _update(self, time, position, orientation, temperature):
         self.time = time
         self.position = position
         self.orientation = orientation
+        self.temperature = temperature
         self.update()
 
 def fluctuation(friction, T, dt):
@@ -138,6 +139,8 @@ class brownian_dynamics:
             o_predict = self.orientation
 
         self.time += self.dt
+        self._update_interactions(self.time, r_predict, o_predict)
+
         F_predict = self._total_force(self.time, r_predict, o_predict)
         v2 = self._get_velocity(self.alpha_T, F_predict, noise_T, o_predict)
         self.velocity = 0.5*(v1 + v2)
@@ -182,7 +185,7 @@ class brownian_dynamics:
         """
         if self.interactions is not None:
             for I in self.interactions:
-                I._update(time, position, orientation)
+                I._update(time, position, orientation, self.temperature)
 
     def _total_force(self, time, position, orientation):
         """
