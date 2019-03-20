@@ -32,3 +32,8 @@ class hard_sphere_collisions(interactions):
 
     def torque(self):
         return np.zeros_like(self.position)
+
+class hard_sphere_plane_collision(interactions):
+    def __init__(self, radii, kn):
+        self.radii = radii
+        self.kn = kn
