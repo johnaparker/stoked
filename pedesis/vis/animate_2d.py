@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from pedesis.vis import colored_plot
+from .colored_plot import colored_plot
 import matplotlib.patheffects as path_effects
 from tqdm import tqdm
 
@@ -116,6 +116,7 @@ def trajectory_animation(coordinates, radii, projection, angles=None, colors=['C
         color = next(color_cycle)
 
         circles.append(plt.Circle(coordinate, radii[i], edgecolor=color, animated=True, **circle_properties))
+        # circles.append(mpl.patches.Ellipse(coordinate, 2*radii[i], 3*radii[i], edgecolor=color, animated=True, **circle_properties))
         ax.add_artist(circles[-1])
 
         if angles is not None:
@@ -150,6 +151,8 @@ def trajectory_animation(coordinates, radii, projection, angles=None, colors=['C
         for i in range(Nparticles): 
             coordinate = coordinates[t,i]
             circles[i].center = coordinate
+            # tran = mpl.transforms.Affine2D().rotate_around(*coordinate, 1.0*t/100)
+            # circles[i].set_transform(tran + ax.transData)
 
             if angles is not None:
                 lines[i].set_data([coordinate[0]-radii[i], coordinate[0]+radii[i]], [coordinate[1], coordinate[1]])

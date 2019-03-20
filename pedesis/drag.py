@@ -69,19 +69,21 @@ class ellipsoid_drag(drag):
         super().__init__(viscosity)
         self.radii = np.asarray(radii, dtype=float)
 
+        a, b, c = self.radii
+        integrand = lambda t: 1/np.sqrt((1 + t)*((b/a)**2 + t)*((c/a)**2 + t))
+        self.chi_0 = a**2*quad(integrand, 0, np.inf)[0]
+        self.alpha_0 = np.zeros(3, dtype=float)
+
+        for i, comp in enumerate([a,b,c]):
+            integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
+            self.alpha_0[i] = comp**2*quad(integrand, 0, np.inf)[0]
+
     def _drag_T(self):
         a, b, c = self.radii
 
         D = np.zeros(3, dtype=float)
-
-        integrand = lambda t: 1/np.sqrt((1 + t)*((b/a)**2 + t)*((c/a)**2 + t))
-        chi_0 = a**2*quad(integrand, 0, np.inf)[0]
-
         for i, comp in enumerate([a,b,c]):
-            integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
-            alpha_0 = quad(integrand, 0, np.inf)[0]
-
-            D[i] = 16*np.pi*viscosity*a*b*c/(chi_0 + alpha_0*comp**2)
+            D[i] = 16*np.pi*self.viscosity*a*b*c/(self.chi_0 + self.alpha_0[i])
 
         return D
 
@@ -89,16 +91,10 @@ class ellipsoid_drag(drag):
         a, b, c = self.radii
 
         D = np.zeros(3, dtype=float)
-        alpha_0 = np.zeros(3, dtype=float)
+        factor = 16*np.pi*self.viscosity*a*b*c 
 
-        for i, comp in enumerate([a,b,c]):
-            integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
-            alpha_0[i] = quad(integrand, 0, np.inf)[0]
+        D[0] = factor/(3*(self.alpha_0[1] + self.alpha_0[2]))*(b**2 + c**2)
+        D[1] = factor/(3*(self.alpha_0[0] + self.alpha_0[2]))*(a**2 + c**2)
+        D[2] = factor/(3*(self.alpha_0[0] + self.alpha_0[1]))*(a**2 + b**2)
 
-        factor = 16*np.pi*viscosity*a*b*c 
-
-        D[0] = factor/(3*(r[1]**2*alpha_0[1] + r[2]**2*alpha_0[2]))*(r[1]**2 + r[2]**2)
-        D[1] = factor/(3*(r[0]**2*alpha_0[0] + r[2]**2*alpha_0[2]))*(r[0]**2 + r[2]**2)
-        D[2] = factor/(3*(r[0]**2*alpha_0[0] + r[1]**2*alpha_0[1]))*(r[0]**2 + r[1]**2)
-
-        return F
+        return D

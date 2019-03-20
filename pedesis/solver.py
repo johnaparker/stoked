@@ -37,12 +37,17 @@ class interactions:
         self.orientation = orientation
         self.update()
 
+def fluctuation(friction, T, dt):
+    """Given a friction matrix, return the fluctuation matrix"""
+    rhs = 2*kb*T*friction/dt
+    return np.linalg.cholesky(rhs)
+
 class brownian_dynamics:
     """
     Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None):
+                 force=None, torque=None, interactions=None, hydrodynamic_coupling=False):
         """
         Arguments:
             temperature        system temperature
@@ -53,17 +58,20 @@ class brownian_dynamics:
             force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
             torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
             interactions       particle interactions (can be a list)
+            hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: False)
         """
         self.temperature = temperature
         self.dt = dt
         self.time = 0
         self.position = np.atleast_2d(np.asarray(position, dtype=float))
         self.drag = drag
+        self.Nparticles = len(self.position)
+        self.hydrodynamic_coupling = hydrodynamic_coupling
 
         if orientation is not None:
             self.orientation = np.asarray(orientation, dtype=np.quaternion)
         else:
-            self.orientation = None
+            self.orientation = np.ones([self.Nparticles], dtype=np.quaternion)
 
         if force is None:
             self.force = [lambda t, rvec, orient: np.zeros_like(rvec)]
@@ -87,28 +95,27 @@ class brownian_dynamics:
             self.interactions = interactions
 
         self.alpha_T = np.zeros_like(self.position)
-        self.beta_T = np.zeros_like(self.position)
-
         drag_T = self.drag.drag_T
         if self.drag.isotropic and not np.isscalar(drag_T):
             drag_T = drag_T[:,np.newaxis]
 
         self.alpha_T[...] = 1/drag_T
-        self.beta_T[...] = np.sqrt(2*kb*self.temperature/(dt*drag_T))
         self.velocity = np.zeros_like(self.position)
 
         if self.orientation is not None:
             self.alpha_R = np.zeros_like(self.position)
-            self.beta_R = np.zeros_like(self.position)
-
             drag_R = self.drag.drag_R
             if self.drag.isotropic and not np.isscalar(drag_R):
                 drag_R = drag_R[:,np.newaxis]
 
-            self.alpha_R[...] = 1/drag_Rs
-            self.beta_R[...] = np.sqrt(2*kb*self.temperature/(dt*drag_Rs))
-
+            self.alpha_R[...] = 1/drag_R
             self.angular_velocity = np.zeros_like(self.position)
+
+        self.isotropic = self.drag.isotropic and not self.hydrodynamic_coupling
+        if self.isotropic and orientation is None:
+            self.rotating = False
+        else:
+            self.rotating = True
 
     def step(self):
         """
@@ -118,29 +125,54 @@ class brownian_dynamics:
 
         F = self._total_force(self.time, self.position, self.orientation)
         noise_T = np.random.normal(size=self.position.shape) 
-        v1 = (self.alpha_T*F + self.beta_T*noise_T)
+        v1 = self._get_velocity(self.alpha_T, F, noise_T, self.orientation)
         r_predict = self.position + self.dt*v1
 
-        if self.orientation is not None:
+        if self.rotating:
             T = self._total_torque(self.time, self.position, self.orientation)
             noise_R = np.random.normal(size=self.position.shape) 
-            w1 = (self.alpha_R*T + self.beta_R*noise_R)
-            o_predict = (1 + w1*self.dt/2)*self.orientation
+            w1 = self._get_velocity(self.alpha_R, T, noise_R, self.orientation)
+            w1_q = np.array([np.quaternion(*omega) for omega in w1])
+            o_predict = (1 + w1_q*self.dt/2)*self.orientation
+        else:
+            o_predict = self.orientation
 
         self.time += self.dt
-
-        F_predict =  self._total_force(self.time, r_predict, None)
-        v2 = (self.alpha_T*F_predict + self.beta_T*noise_T)
+        F_predict = self._total_force(self.time, r_predict, o_predict)
+        v2 = self._get_velocity(self.alpha_T, F_predict, noise_T, o_predict)
         self.velocity = 0.5*(v1 + v2)
-        self.position = self.position + 0.5*self.dt*(v1 + v2)
+        self.position += self.dt*self.velocity
 
-        if self.orientation is not None:
-            T_predict =  self._total_torque(self.time, r_predict, None)
-            w2 = (self.alpha_R*T_predict + self.beta_R*noise_R)
+        if self.rotating:
+            T_predict =  self._total_torque(self.time, r_predict, o_predict)
+            w2 = self._get_velocity(self.alpha_R, T_predict, noise_R, o_predict)
+            w2_q = np.array([np.quaternion(*omega) for omega in w2])
+            w_q = (w1_q + w2_q)/2
             self.angular_velocity = 0.5*(w1 + w2)
-            self.orientation = (1 + (w1 + w2)*self.dt/4)
+            self.orientation = (1 + w_q*self.dt/2)*self.orientation
 
             self.orientation = np.normalized(self.orientation)
+
+    def _get_velocity(self, alpha, drive, noise, orientation):
+        """
+        FOR INTERNAL USE ONLY
+
+        obtain velocity (or angular velocity) given alpha parameter, drive force/torque, noise, and orientation
+        """
+        if self.isotropic:
+            beta = np.sqrt(2*kb*self.temperature*alpha/self.dt)
+            velocity = alpha*drive + beta*noise
+        else:
+            rot = quaternion.as_rotation_matrix(orientation)
+            alpha = np.einsum('Nij,Nj,Nlj->Nil', rot, alpha, rot)
+
+            beta = np.zeros_like(alpha)
+            for i in range(self.Nparticles):
+                beta[i] = fluctuation(alpha[i], self.temperature, self.dt)
+
+            velocity = np.einsum('Nij,Nj->Ni', alpha, drive) + np.einsum('Nij,Nj->Ni', beta, noise)
+
+        return velocity
 
     def _update_interactions(self, time, position, orientation):
         """
