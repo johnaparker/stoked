@@ -1,2 +1,26 @@
 *.egg-info
 __pycache__
+*.pyc
+*.sw*
+todo.txt
+*.pdf
+*.png
+*.html
+
+# vscode
+settings.json
+tags
+
+# latex
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz
+*.bbl
+*.blg
+*.out
+*.toc
+
+# pytest
+.pytest_cache

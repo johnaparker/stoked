@@ -1,0 +1,99 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amsfonts,amssymb}   % basic math
+\usepackage{graphicx}  % images
+\usepackage{float}     % floating image support
+\usepackage{listings}  % code input
+\usepackage{color}     % colors
+\usepackage[super,comma]{natbib}    % citing
+\usepackage[T1]{fontenc}      % fonts
+\usepackage[utf8]{inputenc}   % fonts
+\usepackage{titling}   % title control
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=.9in]{geometry}
+\usepackage[labelfont=bf]{caption}
+\usepackage{subcaption}
+\usepackage{indentfirst}
+\usepackage[affil-it]{authblk}
+\usepackage{enumitem}
+\usepackage{scrextend}
+
+\usepackage{varioref}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\hypersetup{
+    colorlinks,
+    citecolor=blue,
+    filecolor=black,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\bibliographystyle{unsrtnat}
+\renewcommand{\bibname}{References}
+
+% standard code colors
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+% setup for python language
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{dkgreen},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\title{Pedesis: Simulating Brownian Dynamics}
+\date{}
+\author{}
+
+\begin{document}
+\maketitle
+%\tableofcontents
+
+\section{Overview}
+The standard Langevin equations for translation and rotational motion for isotropic drag forces:
+\begin{subequations}
+\begin{align}
+    m_i \frac{d\bm{v}_i(t)}{dt} &= \bm{F}_i(t, \bm{r}) - \lambda_i^T \bm{v}_i(t) + \sqrt{2kT\lambda_i^T} \; \bm{\eta}^T(t) \\
+    \frac{d[I_i \bm{\omega}_i(t)]}{dt} &= \bm{\tau}_i(t, \bm{r}) - \lambda_i^R \bm{\omega}_i(t) + \sqrt{2kT\lambda_i^R} \; \bm{\eta}^R(t)
+\end{align}
+\end{subequations}
+
+Generalized to anisotropic drag forces:
+\begin{subequations}
+\begin{align}
+    m_i \frac{d\bm{v}_i(t)}{dt} &= \bm{F}_i(t, \bm{r}) - \Lambda_i^T \bm{v}_i(t) + \zeta^T \sqrt{2kT} \; \bm{\eta}^T(t) \\
+\frac{d[I_i \bm{\omega}_i(t)]}{dt} &= \bm{\tau}_i(t, \bm{r}) - \overleftrightarrow{\bm{\Lambda}_i^R} \bm{\omega}_i(t) + \sqrt{2kT}\; \overleftrightarrow{\bm{\zeta}^R}  \bm{\eta}^R(t)
+\end{align}
+\end{subequations}
+where $\overleftrightarrow{\bm{\zeta}}$ satisfies the property $\overleftrightarrow{\bm{\zeta}} \overleftrightarrow{\bm{\zeta}}^T = 2kT\overleftrightarrow{\bm{\Lambda}}$
+
+For the fully coupled hydrodynamic case, denote the grand momentum
+\begin{equation}
+    \bm{P} = (P_{1x},\; P_{1y},\; P_{1z}, \ldots, P_{Nx},\; P_{Ny},\; P_{Nz},\;
+    L_{1x},\; L_{1y},\; L_{1z}, \ldots, L_{Nx},\; L_{Ny},\; L_{Nz})
+\end{equation}
+and grand velocity
+\begin{equation}
+    \bm{V} = (v_{1x},\; v_{1y},\; v_{1z}, \ldots, v_{Nx},\; v_{Ny},\; v_{Nz},\;
+    \omega_{1x},\; \omega_{1y},\; \omega_{1z}, \ldots, \omega_{Nx},\; \omega_{Ny},\; \omega_{Nz})
+\end{equation}
+
+
+\end{document}
