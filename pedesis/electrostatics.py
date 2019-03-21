@@ -61,7 +61,7 @@ class double_layer_spheres(interactions):
         r_ij = np.linalg.norm(r_ijx, axis=-1)
 
         T1 = np.add.outer(radius, radius)
-        T2 = np.arctanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
+        T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
         Q = factor*T1*np.multiply.outer(T2, T2)*np.exp(-(r_ij - T1)/self.debye)
 
         with np.errstate(divide='ignore'):
