@@ -64,8 +64,7 @@ class double_layer_spheres(interactions):
         T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
         Q = factor*T1*np.multiply.outer(T2, T2)*np.exp(-(r_ij - T1)/self.debye)
 
-        with np.errstate(divide='ignore'):
-            F_ijx = np.einsum('ij,ij,ijx->ijx', Q, 1/(r_ij + 1e-20), r_ijx)
+        F_ijx = np.einsum('ij,ij,ijx->ijx', Q, 1/(r_ij + 1e-20), r_ijx)
 
         np.einsum('iix->x', F_ijx)[...] = 0
         F = np.sum(F_ijx, axis=1)
@@ -108,12 +107,8 @@ class double_layer_interface(interactions):
         T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
         Q = np.sign(dz)*factor*radius*T1*T2*np.exp(-(dz - radius)/self.debye)
 
-        with np.errstate(divide='ignore'):
-            F_ijx = np.einsum('ij,ij,ijx->ijx', Q, 1/(r_ij + 1e-20), r_ijx)
-
-        np.einsum('iix->x', F_ijx)[...] = 0
-        F = np.sum(F_ijx, axis=1)
-
+        F = np.zeros_like(self.position)
+        F[:,2] = Q
         return F
 
     def torque(self):
