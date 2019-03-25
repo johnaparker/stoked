@@ -11,3 +11,4 @@ from .vis import trajectory_animation
 from .electrostatics import (electrostatics, double_layer_spheres,
                              double_layer_interface)
 from .van_der_waals import van_der_waals_spheres, van_der_waals_interface
+from .gravity import gravity, sphere_gravity, ellipsoid_gravity
