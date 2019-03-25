@@ -68,7 +68,7 @@ class hard_sphere_plane_collision(interactions):
 
         dz = self.position[:,2] - self.zpos
         idx = np.abs(dz) < rad
-        F[idx,2] = np.sign(dz)*self.kn*dz**1.5
+        F[idx,2] = np.sign(dz[idx])*self.kn*np.sqrt((dz[idx] - rad[idx])**3)
 
         return F
 
