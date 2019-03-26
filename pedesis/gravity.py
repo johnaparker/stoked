@@ -1,4 +1,5 @@
 from scipy import constants
+import numpy as np
 
 density_water = 997
 
@@ -22,10 +23,10 @@ def gravity(volume, density, density_medium=density_water, direction=[0,0,-1]):
 
     return force
 
-def sphere_gravity(radius, density, density_medium=density_water, direction=[0,0,-1]):
+def gravity_sphere(radius, density, density_medium=density_water, direction=[0,0,-1]):
     volume = 4/3*np.pi*radius**3
     return gravity(volume, density, density_medium, direction)
 
-def ellipsoid_gravity(radii, density, density_medium=density_water, direction=[0,0,-1]):
+def gravity_ellipsoid(radii, density, density_medium=density_water, direction=[0,0,-1]):
     volume = 4/3*np.pi*np.product(radii, axis=-1)
     return gravity(volume, density, density_medium, direction)

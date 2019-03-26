@@ -32,7 +32,7 @@ class electrostatics(interactions):
         return np.zeros_like(self.position)
 
 
-class double_layer_spheres(interactions):
+class double_layer_sphere(interactions):
     """
     Electrostatic interactions in a fluid medium for spheres
     """
@@ -74,7 +74,7 @@ class double_layer_spheres(interactions):
     def torque(self):
         return np.zeros_like(self.position)
 
-class double_layer_interface(interactions):
+class double_layer_sphere_interface(interactions):
     """
     Electrostatic interactions in a fluid medium near an interface
     """

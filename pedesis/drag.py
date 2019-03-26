@@ -35,7 +35,7 @@ class drag:
         """rotational drag coeffecient"""
         return self._drag_R()
 
-class sphere_drag(drag):
+class drag_sphere(drag):
     """
     Drag coeffecients for a sphere
     """
@@ -55,7 +55,7 @@ class sphere_drag(drag):
     def _drag_R(self):
         return 8*np.pi*self.radius**3*self.viscosity
 
-class ellipsoid_drag(drag):
+class drag_ellipsoid(drag):
     """
     Drag coeffecients for an ellipsoid
     """

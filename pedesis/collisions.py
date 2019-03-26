@@ -1,7 +1,7 @@
 import numpy as np
 from pedesis import interactions
 
-class hard_sphere_collisions(interactions):
+class collisions_sphere(interactions):
     """
     Collision between spheres using the force model F = kn*overlap^1.5
     """
@@ -42,7 +42,7 @@ class hard_sphere_collisions(interactions):
         return np.zeros_like(self.position)
 
 
-class hard_sphere_plane_collision(interactions):
+class collisions_sphere_interface(interactions):
     """
     Collision between spheres and a planar surface using the force model F = kn*overlap^1.5
     """
