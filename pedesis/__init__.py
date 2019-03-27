@@ -12,3 +12,4 @@ from .electrostatics import (electrostatics, double_layer_sphere,
                              double_layer_sphere_interface)
 from .van_der_waals import van_der_waals_sphere, van_der_waals_sphere_interface
 from .gravity import gravity, gravity_sphere, gravity_ellipsoid
+from .hydrodynamics import grand_mobility_matrix
