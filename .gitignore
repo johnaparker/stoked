@@ -24,3 +24,7 @@ tags
 
 # pytest
 .pytest_cache
+
+# cpp
+build/
+pybind11/
