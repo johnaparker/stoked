@@ -4,20 +4,48 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+NAME = 'pedesis'
+DESCRIPTION = "Simulation and visualization of Stokesian dynamics for N interacting particles"
+URL = ''
+EMAIL = 'japarker@uchicago.edu'
+AUTHOR = 'John Parker'
+KEYWORDS = 'stokesian dynamics brownian'
+# REQUIRES_PYTHON = '>=3.6.0'
+VERSION = '0.1'
+LICENSE = 'MIT'
+
+REQUIRED = [
+    'numpy', 
+    'scipy',
+    'matplotlib',
+    'tqdm',
+    'numpy_quaternion',
+]
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 setup(
-    name = "pedesis",
-    version = "0.1.0",
-    author = "John Parker",
-    author_email = "japarker@uchicago.com",
-    description = ("Simulation and visualization of Brownian motion and related dynamics"),
-    license = "MIT",
-    keywords = "",
-    packages=['pedesis'],
+    name=NAME,
+    version=VERSION,
+    author=AUTHOR,
+    author_email=EMAIL,
+    description=DESCRIPTION,
+    license=LICENSE,
+    keywords=KEYWORDS,
+    url=URL,
+    packages=find_packages(),
     long_description=read('README.md'),
-    install_requires=['numpy', 'scipy'],
-    include_package_data = True,
+    long_description_content_type='text/markdown',
+    install_requires=REQUIRED,
     classifiers=[
-        "Development Status :: 3 - Alpha",
-        "License :: OSI Approved :: MIT License",
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Operating System :: POSIX',
+        'Operating System :: MacOS',
+        'Development Status :: 3 - Alpha',
+        'Topic :: Scientific/Engineering :: Physics',
+        'Intended Audience :: Science/Research',
     ],
+    zip_safe=False,
 )
