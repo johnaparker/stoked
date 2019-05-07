@@ -26,11 +26,10 @@ def Fext(t, rvec, orientation):
 
 def torque(t, rvec, orientation):
     T = np.zeros_like(rvec)
-    T[:,2] = 2e-16
+    T[:,2] = 8e-17
     return T
 
-sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, hydrodynamic_coupling=True,
-        torque=torque)
+sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, torque=torque)
 for i in tqdm(range(Nsteps)):
     history[i] = sim.position.squeeze()
     wz[i] = sim.angular_velocity[...,2]

@@ -1,4 +1,4 @@
-from stoked import stokesian_dynamics, trajectory_animation, drag_sphere
+from stoked import brownian_dynamics, trajectory_animation, drag_sphere
 from functools import partial
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -22,9 +22,9 @@ for Fext in [no_force, harmonic_force]:
     history = np.zeros([Nsteps,3], dtype=float)
 
     if Fext is no_force:
-        sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=Fext)
+        sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=Fext)
     else:
-        sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=partial(Fext, k=0.01))
+        sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=partial(Fext, k=0.01))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

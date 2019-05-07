@@ -4,7 +4,7 @@ StokeD
 Simulation and visualization of Stokesian motion
 """
 
-from .solver import stokesian_dynamics, interactions
+from .solver import stokesian_dynamics, brownian_dynamics, interactions
 from .drag import drag, drag_sphere, drag_ellipsoid
 from .collisions import collisions_sphere, collisions_sphere_interface
 from .vis import trajectory_animation

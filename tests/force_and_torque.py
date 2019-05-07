@@ -1,4 +1,4 @@
-from stoked import stokesian_dynamics, ellipsoid_drag, trajectory_animation
+from stoked import brownian_dynamics, ellipsoid_drag, trajectory_animation
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -20,7 +20,7 @@ def force(t, pos, orient):
 def torque(t, pos, orient):
     return np.array([[0,0,5e-3]])
 
-sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt,
+sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt,
                         force=force, torque=torque)
 
 for i in tqdm(range(Nsteps)):

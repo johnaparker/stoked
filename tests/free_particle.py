@@ -1,4 +1,4 @@
-from stoked import stokesian_dynamics, drag_sphere
+from stoked import brownian_dynamics, drag_sphere
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -14,7 +14,7 @@ ax.set_aspect('equal')
 
 history = np.zeros([Nsteps,3], dtype=float)
 
-sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt)
+sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt)
 
 for i in tqdm(range(Nsteps)):
     history[i] = sim.position.squeeze()

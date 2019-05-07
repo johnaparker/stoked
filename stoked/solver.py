@@ -277,3 +277,22 @@ class stokesian_dynamics:
             for I in self.interactions:
                 T += I.torque()
         return T
+
+def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
+                 force=None, torque=None, interactions=None):
+    """
+    Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
+        
+    Arguments:
+        temperature        system temperature
+        dt                 time-step
+        position[N,3]      initial position of N particles
+        drag               drag coefficients (of base type stoked.drag)
+        orientation[N]     initial orientation of N particles (as quaternions)
+        force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
+        torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
+        interactions       particle interactions (can be a list)
+    """
+    return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
+                  orientation=orientation, force=force, torque=torque, interactions=interactions,
+                  hydrodynamic_coupling=False)
