@@ -4,7 +4,7 @@ Electrodynamic interactions in the point-dipole approximation
 import numpy as np
 from scipy import constants
 import quaternion
-from pedesis import interactions
+from stoked import interactions
 
 
 def greens(R, k, eps_b=1):

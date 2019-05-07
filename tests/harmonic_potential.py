@@ -1,4 +1,4 @@
-from pedesis import brownian_dynamics, trajectory_animation, sphere_drag
+from stoked import stokesian_dynamics, trajectory_animation, drag_sphere
 from functools import partial
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -10,7 +10,7 @@ def harmonic_force(t, rvec, orientation, k=1):
     return -k*rvec
 
 position = [0,0,0]
-drag = sphere_drag(1/(6*np.pi), 1)
+drag = drag_sphere(1/(6*np.pi), 1)
 temperature = .05
 dt = 10
 
@@ -22,9 +22,9 @@ for Fext in [no_force, harmonic_force]:
     history = np.zeros([Nsteps,3], dtype=float)
 
     if Fext is no_force:
-        sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=Fext)
+        sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=Fext)
     else:
-        sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=partial(Fext, k=0.01))
+        sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, force=partial(Fext, k=0.01))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

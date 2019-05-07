@@ -24,9 +24,9 @@
             Array radius;
     };
 
-    class brownian_dynamics {
+    class stokesian_dynamics {
         public:
-            brownian_dynamics(double temperature, double dt, Matrix position);
+            stokesian_dynamics(double temperature, double dt, Matrix position);
             void step(int Nsteps=1);
             void run_until(double final_time) {};
             const Matrix& get_position() const { return position; }

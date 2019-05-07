@@ -44,23 +44,23 @@ def fluctuation(friction, T, dt):
     rhs = 2*kb*T*friction/dt
     return np.linalg.cholesky(rhs)
 
-class brownian_dynamics:
+class stokesian_dynamics:
     """
-    Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
+    Perform a Stokesian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, hydrodynamic_coupling=False):
+                 force=None, torque=None, interactions=None, hydrodynamic_coupling=True):
         """
         Arguments:
             temperature        system temperature
             dt                 time-step
             position[N,3]      initial position of N particles
-            drag               drag coefficients (of base type pedesis.drag)
+            drag               drag coefficients (of base type stoked.drag)
             orientation[N]     initial orientation of N particles (as quaternions)
             force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
             torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
             interactions       particle interactions (can be a list)
-            hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: False)
+            hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
         """
         self.temperature = temperature
         self.dt = dt

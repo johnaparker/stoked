@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pedesis
+import stoked
 import miepy
 from scipy.integrate import cumtrapz
 from scipy import constants
@@ -9,9 +9,9 @@ from miepy.constants import Z0
 nm = 1e-9
 radius = 75*nm
 
-A1 = pedesis.van_der_waals_sphere_interface(radius, .5e-19)
-A2 = pedesis.double_layer_sphere_interface(radius, -16e-3, -77e-3, debye=22.7*nm)
-A3 = pedesis.gravity_sphere(radius, 10490, direction=[0,0,1])
+A1 = stoked.van_der_waals_sphere_interface(radius, .5e-19)
+A2 = stoked.double_layer_sphere_interface(radius, -16e-3, -77e-3, debye=22.7*nm)
+A3 = stoked.gravity_sphere(radius, 10490, direction=[0,0,1])
 
 z = np.linspace(radius+5*nm, 400*nm, 100)
 F1 = np.zeros_like(z)

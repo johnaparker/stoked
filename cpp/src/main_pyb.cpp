@@ -5,11 +5,11 @@ namespace py = pybind11;
 // special submodule
 void bind_drag_t(py::module &);
 void bind_drag_sphere(py::module &);
-void bind_brownian_dynamics(py::module &);
+void bind_stokesian_dynamics(py::module &);
 
 PYBIND11_MODULE(cpp, m) {
     m.doc() = R"pbdoc(
-        C++ submodule of Pedesis
+        C++ submodule of StokeD
         -----------------------
 
         .. currentmodule:: cpp
@@ -23,5 +23,5 @@ PYBIND11_MODULE(cpp, m) {
 
     //bind_drag_t(m);
     bind_drag_sphere(m);
-    bind_brownian_dynamics(m);
+    bind_stokesian_dynamics(m);
 }

@@ -1,6 +1,6 @@
-Pedesis
+StokeD
 ==============
-Pedesis solves the Stokesian dynamics (SD) equations for N interacting particles. SD is a generalization of Brownian dynamics (BD) that includes hydrodynamic coupling interactions.
+StokeD solves the Stokesian dynamics (SD) equations for N interacting particles. SD is a generalization of Brownian dynamics (BD) that includes hydrodynamic coupling interactions.
 
 Features
 --------------
@@ -12,7 +12,7 @@ Features
 Installation
 --------------
 ```shell
-pip install pedesis
+pip install stoked
 ```
 
 Usage
@@ -24,4 +24,4 @@ For full documentation, see docs folder.
 
 License
 --------------
-Pedesis is licensed under the terms of the MIT license.
+StokeD is licensed under the terms of the MIT license.

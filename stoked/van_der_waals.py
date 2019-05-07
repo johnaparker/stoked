@@ -1,5 +1,5 @@
 import numpy as np
-from pedesis import interactions
+from stoked import interactions
 
 class van_der_waals_sphere(interactions):
     def __init__(self, radius, hamaker):

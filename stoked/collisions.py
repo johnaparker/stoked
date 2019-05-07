@@ -1,5 +1,5 @@
 import numpy as np
-from pedesis import interactions
+from stoked import interactions
 
 class collisions_sphere(interactions):
     """
@@ -11,7 +11,7 @@ class collisions_sphere(interactions):
             radii   particle radii
             kn      force constant
         """
-        # self.radii = pedesis.array(radii)
+        # self.radii = stoked.array(radii)
         self.radii = radii
         self.kn = kn
 

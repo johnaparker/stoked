@@ -1,4 +1,4 @@
-from pedesis import brownian_dynamics, trajectory_animation, drag_sphere
+from stoked import stokesian_dynamics, trajectory_animation, drag_sphere
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -29,7 +29,7 @@ def torque(t, rvec, orientation):
     T[:,2] = 2e-16
     return T
 
-sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, hydrodynamic_coupling=True,
+sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, hydrodynamic_coupling=True,
         torque=torque)
 for i in tqdm(range(Nsteps)):
     history[i] = sim.position.squeeze()

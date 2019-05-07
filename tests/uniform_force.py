@@ -1,4 +1,4 @@
-from pedesis import brownian_dynamics
+from stoked import stokesian_dynamics
 from functools import partial
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -19,7 +19,7 @@ def test_uniform_motion():
 
     history = np.zeros([Nsteps,3], dtype=float)
     velocity = np.zeros([Nsteps,3], dtype=float)
-    sim = brownian_dynamics(position, damping, temperature, dt, force=partial(uniform_force, Fx=Fx))
+    sim = stokesian_dynamics(position, damping, temperature, dt, force=partial(uniform_force, Fx=Fx))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

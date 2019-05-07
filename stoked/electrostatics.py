@@ -1,13 +1,13 @@
 import numpy as np
 from scipy import constants
-from pedesis import interactions
+from stoked import interactions
 
 class electrostatics(interactions):
     """
     Free-space point electrostatic interactions
     """
     def __init__(self, charges):
-        # self.charges = pedesis.array(charges)
+        # self.charges = stoked.array(charges)
         self.charges = charges
 
     def force(self):

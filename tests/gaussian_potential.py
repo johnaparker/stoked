@@ -1,4 +1,4 @@
-from pedesis import brownian_dynamics, trajectory_animation, sphere_drag
+from stoked import stokesian_dynamics, trajectory_animation, drag_sphere
 from functools import partial
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -18,7 +18,7 @@ r2 = [delta*.9, 0, 0]
 w1 = w2 = delta/1.3
 A1 = A2 = 1e-22
 position = [-delta,0,0]
-drag = sphere_drag(1/(6*np.pi), 1)
+drag = drag_sphere(1/(6*np.pi), 1)
 temperature = .4
 dt = 10
 
@@ -27,7 +27,7 @@ fig, ax = plt.subplots()
 ax.set_aspect('equal')
 
 history = np.zeros([Nsteps,3], dtype=float)
-sim = brownian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, 
+sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, 
                         force=partial(bigaussian_force, rvec1=r1, rvec2=r2, A1=A1, A2=A2, w1=w1, w2=w2))
 
 for i in tqdm(range(Nsteps)):

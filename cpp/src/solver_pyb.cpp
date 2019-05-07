@@ -20,9 +20,9 @@ using namespace pybind11::literals;
             .def("drag_R", &drag_sphere::drag_R);
     }
 
-    void bind_brownian_dynamics(py::module &m) {
-        py::class_<brownian_dynamics>(m, "brownian_dynamics")
+    void bind_stokesian_dynamics(py::module &m) {
+        py::class_<stokesian_dynamics>(m, "stokesian_dynamics")
             .def(py::init<double, double, Matrix>())
-            .def("step", &brownian_dynamics::step, "Nsteps"_a=1)
-            .def_property_readonly("position", &brownian_dynamics::get_position);
+            .def("step", &stokesian_dynamics::step, "Nsteps"_a=1)
+            .def_property_readonly("position", &stokesian_dynamics::get_position);
     }

@@ -28,3 +28,6 @@ tags
 # cpp
 build/
 pybind11/
+
+temp/
+*.h5

@@ -21,7 +21,7 @@
         return drag;
     }
 
-    brownian_dynamics::brownian_dynamics(double temperature, double dt, Matrix position):
+    stokesian_dynamics::stokesian_dynamics(double temperature, double dt, Matrix position):
         temperature(temperature), dt(dt), position(position) {
             Nparticles = position.rows();
             ndim = position.cols();
@@ -31,7 +31,7 @@
 
     }
 
-    void brownian_dynamics::step(int Nsteps) {
+    void stokesian_dynamics::step(int Nsteps) {
         for (int i = 0; i < Nsteps; i++) {
             Matrix Rn(position.rows(), position.cols());
             for (int n = 0; n < Nparticles; n++) {
