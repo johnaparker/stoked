@@ -54,11 +54,11 @@ class stokesian_dynamics:
         Arguments:
             temperature        system temperature
             dt                 time-step
-            position[N,3]      initial position of N particles
+            position[N,D]      initial position of N particles in D dimensions
             drag               drag coefficients (of base type stoked.drag)
             orientation[N]     initial orientation of N particles (as quaternions)
-            force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
-            torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
+            force(t, r, q)     external force function given time t, position r[N,D], orientation q[N] and returns force F[N,D] (can be a list of functions)
+            torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
             interactions       particle interactions (can be a list)
             hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
         """
@@ -286,11 +286,11 @@ def brownian_dynamics(*, temperature, dt, position, drag, orientation=None,
     Arguments:
         temperature        system temperature
         dt                 time-step
-        position[N,3]      initial position of N particles
+        position[N,D]      initial position of N particles in D dimensions
         drag               drag coefficients (of base type stoked.drag)
         orientation[N]     initial orientation of N particles (as quaternions)
-        force(t, r, q)     external force function given time t, position r[N,3], orientation q[N] and returns force F[N,3] (can be a list of functions)
-        torque(t, r, q)    external torque function given time t, position r[N,3], orientation q[N] and returns torque T[N,3] (can be a list of functions)
+        force(t, r, q)     external force function given time t, position r[N,D], orientation q[N] and returns force F[N,D] (can be a list of functions)
+        torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
         interactions       particle interactions (can be a list)
     """
     return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
