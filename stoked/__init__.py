@@ -15,4 +15,5 @@ from .hydrodynamics import grand_mobility_matrix
 from .constraints import constrain_position, constrain_rotation
 
 from .analysis import msd
+from .utility import quaternion_to_angles
 from .vis import trajectory_animation, circle_patches
