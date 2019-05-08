@@ -4,6 +4,8 @@ from collections.abc import Iterable
 import quaternion
 from abc import ABCMeta, abstractmethod
 from .hydrodynamics import grand_mobility_matrix
+from tqdm import tqdm
+from collections import namedtuple
 
 class interactions:
     """
@@ -127,6 +129,52 @@ class stokesian_dynamics:
             self._step_hydrodynamics()
         else:
             self._step()
+
+    def run(self, Nsteps):
+        """
+        Run the simulation for Nsteps, returning the trajectories
+        """
+        trajectory = namedtuple('trajectory', ['position', 'orientation'])
+        position = np.zeros((Nsteps,) + self.position.shape, dtype=float)
+
+        if self.rotating:
+            orientation = np.zeros((Nsteps,) + self.orientation.shape, dtype=np.quaternion)
+        else:
+            orientation = None
+
+        for i in tqdm(range(Nsteps), desc='Running dynamics'):
+            self.step()
+            position[i] = self.position
+            if self.rotating:
+                orientation[i] = self.orientation
+
+        return trajectory(position, orientation)
+
+    def run_until(self, condition):
+        """
+        Run the simulation until some condition is met, returning the trajectories
+        """
+        trajectory = namedtuple('trajectory', ['position', 'orientation'])
+        position = []
+
+        if self.rotating:
+            orientation = []
+        else:
+            orientation = None
+
+        with tqdm(desc='Running dynamics until condition is met') as pbar:
+            while not condition():
+                self.step()
+                position.append(np.copy(self.position))
+                if self.rotating:
+                    orientation.append(np.copy(self.orientation))
+                pbar.update()
+
+        position = np.array(position, dtype=float)
+        if self.rotating:
+            orientation = np.array(orientation, dtype=np.quaternion)
+
+        return trajectory(position, orientation)
 
     def _step(self):
         self._update_interactions(self.time, self.position, self.orientation)
