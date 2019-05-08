@@ -135,7 +135,7 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
 
         if patches is not None:
             particles.append(patches_type[i](pos, *patches_args[i], edgecolor=color, animated=True, **circle_properties))
-            ax.add_artist(particles[-1])
+            ax.add_patch(particles[-1])
 
         # if angles is not None:
             # lines.append(plt.Line2D([coordinate[0]-radii[i], coordinate[0]+radii[i]], [coordinate[1], coordinate[1]], lw=circle_properties['linewidth'], color=color, animated=True, zorder=circle_properties['zorder']))

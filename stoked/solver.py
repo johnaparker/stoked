@@ -51,7 +51,8 @@ class stokesian_dynamics:
     Perform a Stokesian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, hydrodynamic_coupling=True):
+                 force=None, torque=None, interactions=None, constraint=None,
+                 hydrodynamic_coupling=True):
         """
         Arguments:
             temperature        system temperature
@@ -62,6 +63,7 @@ class stokesian_dynamics:
             force(t, r, q)     external force function given time t, position r[N,D], orientation q[N] and returns force F[N,D] (can be a list of functions)
             torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
             interactions       particle interactions (can be a list)
+            constraint         particle constraints (can be a list)
             hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
         """
         self.temperature = temperature
@@ -70,6 +72,7 @@ class stokesian_dynamics:
         self.position = np.atleast_2d(np.asarray(position, dtype=float))
         self.drag = drag
         self.Nparticles = len(self.position)
+        self.ndim = self.position.shape[1]
         self.hydrodynamic_coupling = hydrodynamic_coupling
 
         if orientation is not None:
@@ -97,6 +100,13 @@ class stokesian_dynamics:
             self.interactions = [interactions]
         else:
             self.interactions = interactions
+
+        if constraint is None:
+            self.constraint = []
+        elif not isinstance(constraint, Iterable):
+            self.constraint = [constraint]
+        else:
+            self.constraint = constraint
 
         self.alpha_T = np.zeros_like(self.position)
         drag_T = self.drag.drag_T
@@ -143,10 +153,10 @@ class stokesian_dynamics:
             orientation = None
 
         for i in tqdm(range(Nsteps), desc='Running dynamics'):
-            self.step()
             position[i] = self.position
             if self.rotating:
                 orientation[i] = self.orientation
+            self.step()
 
         return trajectory(position, orientation)
 
@@ -164,10 +174,10 @@ class stokesian_dynamics:
 
         with tqdm(desc='Running dynamics until condition is met') as pbar:
             while not condition():
-                self.step()
                 position.append(np.copy(self.position))
                 if self.rotating:
                     orientation.append(np.copy(self.orientation))
+                self.step()
                 pbar.update()
 
         position = np.array(position, dtype=float)
@@ -194,6 +204,7 @@ class stokesian_dynamics:
             o_predict = self.orientation
 
         self.time += self.dt
+        self._perform_constraints(r_predict, o_predict)
         self._update_interactions(self.time, r_predict, o_predict)
 
         F_predict = self._total_force(self.time, r_predict, o_predict)
@@ -209,7 +220,13 @@ class stokesian_dynamics:
             self.angular_velocity = 0.5*(w1 + w2)
             self.orientation = (1 + w_q*self.dt/2)*self.orientation
 
+        self._perform_constraints(self.position, self.orientation)
+        if self.rotating:
             self.orientation = np.normalized(self.orientation)
+
+    def _perform_constraints(self, position, orientation):
+        for constraint in self.constraint:
+            constraint(position, orientation)
 
     def _step_hydrodynamics(self):
         self._update_interactions(self.time, self.position, self.orientation)
@@ -327,7 +344,7 @@ class stokesian_dynamics:
         return T
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None):
+                 force=None, torque=None, interactions=None, constraint=None):
     """
     Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
         
@@ -340,7 +357,8 @@ def brownian_dynamics(*, temperature, dt, position, drag, orientation=None,
         force(t, r, q)     external force function given time t, position r[N,D], orientation q[N] and returns force F[N,D] (can be a list of functions)
         torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
         interactions       particle interactions (can be a list)
+        constraint         particle constraints (can be a list)
     """
     return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
                   orientation=orientation, force=force, torque=torque, interactions=interactions,
-                  hydrodynamic_coupling=False)
+                  constraint=constraint, hydrodynamic_coupling=False)
