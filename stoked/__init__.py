@@ -14,4 +14,4 @@ from .gravity import gravity, gravity_sphere, gravity_ellipsoid
 from .hydrodynamics import grand_mobility_matrix
 
 from .analysis import msd
-from .vis import trajectory_animation
+from .vis import trajectory_animation, circle_patches
