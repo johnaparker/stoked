@@ -1,0 +1,50 @@
+{% set name = "stoked" %}
+{% set version = "0.1" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 53d506cf0e9afe79d2e2de5021ef02c408e24c604d9b0714949e2299fc0e81a1
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+
+requirements:
+  host:
+    - matplotlib
+    - numpy
+    - quaternion
+    - pip
+    - python
+    - scipy
+    - tqdm
+  run:
+    - matplotlib
+    - numpy
+    - quaternion
+    - python
+    - scipy
+    - tqdm
+
+test:
+  imports:
+    - stoked
+    - stoked.vis
+
+about:
+  home: The package home page
+  license: MIT
+  license_family: MIT
+  license_file: 
+  summary: Simulation and visualization of Stokesian dynamics for N interacting particles
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - your-github-id-here
