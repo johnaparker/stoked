@@ -10,6 +10,7 @@ from tqdm import tqdm
 import matplotlib.colors as mcolors
 from collections.abc import Iterable
 from collections import namedtuple
+import stoked
 
 patches = namedtuple('patches', ['patches_type', 'args'])
 def circle_patches(radius):
@@ -44,14 +45,13 @@ def rotation_transform(axis, angle, ax = None):
     return t_rotate + t_scale
 
 #TODO use matplotlib collections, patchcollection instead of python lists for performance
-def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, time=None, time_unit='T',
+def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, time_unit='T',
         xlim=None, ylim=None, number_labels=False, trail=100, trail_type='fading',
         time_kwargs={}, label_kwargs={}, circle_kwargs={}, trail_kwargs={}, fading_kwargs={}, **kwargs):
     """Create a 2D animation of trajectories
 
        Arguments:
-            func                       function that returns (x,y) coordinates
-            angles[T,N]                particle angles
+            func                       function that returns (x,y) coordinates and angles
             colors                     list of colors to cycle through
             ax (default None)          specify the axes of the animation
             time[N]                    display the time (in time_units)
@@ -99,7 +99,10 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
     fading_properties = dict(max_lw=2, min_lw=0.3)
     fading_properties.update(fading_kwargs)
 
-    positions = np.asarray(func(0), dtype=float)
+    positions, angles = func(0)
+    positions = np.asarray(positions, dtype=float)
+    if angles is not None:
+        angles = np.asarray(angles, dtype=float)
     Nparticles = positions.shape[0]
 
     if ax is None:
@@ -137,10 +140,10 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
             particles.append(patches_type[i](pos, *patches_args[i], edgecolor=color, animated=True, **circle_properties))
             ax.add_patch(particles[-1])
 
-        # if angles is not None:
-            # lines.append(plt.Line2D([coordinate[0]-radii[i], coordinate[0]+radii[i]], [coordinate[1], coordinate[1]], lw=circle_properties['linewidth'], color=color, animated=True, zorder=circle_properties['zorder']))
-            # lines.append(plt.Line2D([coordinate[0]-radii[i], coordinate[0]+radii[i]], [coordinate[1], coordinate[1]], color=color, animated=True, **line_properties))
-            # ax.add_line(lines[-1])
+            if patches_type[i] is plt.Circle and angles is not None:
+                radius = patches_args[i][0]
+                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=True, **line_properties))
+                ax.add_line(lines[-1])
 
         if trail > 0:
             if trail_type == 'normal':
@@ -169,7 +172,11 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
     def update(t):
         nonlocal history
 
-        positions = np.asarray(func(t), dtype=float)
+        positions, angles = func(t)
+        positions = np.asarray(positions, dtype=float)
+        if angles is not None:
+            angles = np.asarray(angles, dtype=float)
+
         history = np.roll(history, 1, axis=0)
         if trail > 0:
             history[0] = positions
@@ -181,9 +188,10 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
                 # tran = mpl.transforms.Affine2D().rotate_around(*coordinate, 1.0*t/100)
                 # particles[i].set_transform(tran + ax.transData)
 
-            # if angles is not None:
-                # lines[i].set_data([coordinate[0]-radii[i], coordinate[0]+radii[i]], [coordinate[1], coordinate[1]])
-                # lines[i].set_transform(rotation_transform(coordinate, angles[t,i], ax=ax))
+            radius = patches_args[i][0]
+            if angles is not None:
+                lines[i].set_data([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]])
+                lines[i].set_transform(rotation_transform(pos[:2], angles[i], ax=ax))
 
             if time is not None:
                 text['clock'].set_text(r"{0:.2f} {1}".format(time[t], time_unit))
@@ -198,7 +206,10 @@ def animation_2d(func, patches, frames=None, angles=None, colors=None, ax=None, 
         return  trails + particles + lines + list(text.values())
 
     def init():
-        positions = np.asarray(func(0), dtype=float)
+        positions, angles = func(0)
+        positions = np.asarray(positions, dtype=float)
+        angles = np.asarray(angles, dtype=float)
+
         history[...] = np.tile(positions, (trail,1,1))
         return  trails + particles + lines + list(text.values())
 
@@ -210,20 +221,28 @@ def trajectory_animation(trajectory, patches=None, *args, **kwargs):
     Create a 2D animation give trajectory data
 
     Arguments:
-        trajectory[T,N,2]    trajectory data for T steps, N particles in 2 dimensions
-        patches              optional patches object to represent particles
+        trajectory     trajectory data for T steps, N particles
+        patches        optional patches object to represent particles
     """
-    def func(i):
-        return trajectory[i]
+    if not isinstance(trajectory, stoked.trajectory):
+        trajectory = stoked.trajectory(trajectory)
 
-    xlim = np.array([np.min(trajectory[...,0]),
-                     np.max(trajectory[...,0])])
-    ylim = np.array([np.min(trajectory[...,1]),
-                     np.max(trajectory[...,1])])
+    if trajectory.orientation is not None:
+        angles = stoked.quaternion_to_angles(trajectory.orientation)
+    else:
+        angles = [None]*len(trajectory.position)
+
+    def func(i):
+        return trajectory.position[i], angles[i]
+
+    xlim = np.array([np.min(trajectory.position[...,0]),
+                     np.max(trajectory.position[...,0])])
+    ylim = np.array([np.min(trajectory.position[...,1]),
+                     np.max(trajectory.position[...,1])])
 
     xbuff = np.abs(xlim[1] - xlim[0])*0.1
     xlim += (-xbuff, xbuff)
     ybuff = np.abs(ylim[1] - ylim[0])*0.1
     ylim += (-ybuff, ybuff)
 
-    return animation_2d(func, patches=patches, frames=len(trajectory), xlim=xlim, ylim=ylim, *args, **kwargs)
+    return animation_2d(func, patches=patches, frames=len(trajectory.position), xlim=xlim, ylim=ylim, *args, **kwargs)

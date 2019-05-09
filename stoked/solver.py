@@ -5,7 +5,15 @@ import quaternion
 from abc import ABCMeta, abstractmethod
 from .hydrodynamics import grand_mobility_matrix
 from tqdm import tqdm
-from collections import namedtuple
+
+class trajectory:
+    def __init__(self, position, orientation=None):
+        self.position = np.asarray(position, dtype=float)
+
+        if orientation is not None:
+            self.orientation = np.asarray(orientation, dtype=np.quaternion)
+        else:
+            self.orientation = None
 
 class interactions:
     """
@@ -144,7 +152,6 @@ class stokesian_dynamics:
         """
         Run the simulation for Nsteps, returning the trajectories
         """
-        trajectory = namedtuple('trajectory', ['position', 'orientation'])
         position = np.zeros((Nsteps,) + self.position.shape, dtype=float)
 
         if self.rotating:
@@ -164,7 +171,6 @@ class stokesian_dynamics:
         """
         Run the simulation until some condition is met, returning the trajectories
         """
-        trajectory = namedtuple('trajectory', ['position', 'orientation'])
         position = []
 
         if self.rotating:
