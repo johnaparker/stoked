@@ -14,7 +14,10 @@ import stoked
 
 patches = namedtuple('patches', ['patches_type', 'args'])
 def circle_patches(radius):
-    return patches(plt.Circle, radius)
+    return patches(plt.Circle, (radius,))
+
+def ellipse_patches(rx, ry):
+    return patches(mpl.patches.Ellipse, (rx, ry))
 
 def atleast(array, dim, length, dtype=None):
     """Given an n-dimensional array, return either an n or n+1 dimensional repeated array
@@ -115,6 +118,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
     color_cycle = cycle(colors)
 
     particles = []
+    dots = []
     lines = []
     trails = []
     text = {}
@@ -125,13 +129,12 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         else:
             patches_type = patches.patches_type
 
-        if not isinstance(patches.args, Iterable):
-            patches_args = [(patches.args,)]*Nparticles
-        elif not isinstance(patches.args[0], Iterable):
-            patches_args = [patches.args]*Nparticles
+        if not isinstance(patches.args[0], Iterable):
+            patches_args = [patches.args for i in range(Nparticles)]
         else:
-            patches_args = patches.args
+            patches_args = [[arg[i] for arg in patches.args] for i in range(Nparticles)]
 
+    inv = ax.transData.transform
     for i in range(Nparticles): 
         pos = positions[i]
         color = next(color_cycle)
@@ -144,6 +147,9 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
                 radius = patches_args[i][0]
                 lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=True, **line_properties))
                 ax.add_line(lines[-1])
+        else:
+            dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=True, transform=None))
+            ax.add_patch(dots[-1])
 
         if trail > 0:
             if trail_type == 'normal':
@@ -183,15 +189,19 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
 
         for i in range(Nparticles): 
             pos = positions[i]
-            if patches:
+            if particles:
                 particles[i].center = pos
-                # tran = mpl.transforms.Affine2D().rotate_around(*coordinate, 1.0*t/100)
-                # particles[i].set_transform(tran + ax.transData)
+                if angles is not None:
+                    tran = mpl.transforms.Affine2D().rotate_around(*pos[:2], angles[i])
+                    particles[i].set_transform(tran + ax.transData)
 
-            radius = patches_args[i][0]
-            if angles is not None:
-                lines[i].set_data([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]])
-                lines[i].set_transform(rotation_transform(pos[:2], angles[i], ax=ax))
+                if angles is not None and patches_type[i] is plt.Circle:
+                    radius = patches_args[i][0]
+                    lines[i].set_data([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]])
+                    lines[i].set_transform(rotation_transform(pos[:2], angles[i], ax=ax))
+
+            if dots:
+                dots[i].center = inv(pos[:2])
 
             if time is not None:
                 text['clock'].set_text(r"{0:.2f} {1}".format(time[t], time_unit))
@@ -203,7 +213,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
                 text[str(i+1)].set_position(pos)
                 
         
-        return  trails + particles + lines + list(text.values())
+        return  trails + particles + lines + list(text.values()) + dots
 
     def init():
         positions, angles = func(0)
@@ -211,7 +221,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         angles = np.asarray(angles, dtype=float)
 
         history[...] = np.tile(positions, (trail,1,1))
-        return  trails + particles + lines + list(text.values())
+        return  trails + particles + lines + list(text.values()) + dots
 
     anim = animation.FuncAnimation(ax.figure, update, frames=frames, init_func=init, blit=True, repeat=True, interval=30, **kwargs)
     return anim
