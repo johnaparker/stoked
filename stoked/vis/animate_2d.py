@@ -249,6 +249,15 @@ def trajectory_animation(trajectory, patches=None, *args, **kwargs):
                      np.max(trajectory.position[...,0])])
     ylim = np.array([np.min(trajectory.position[...,1]),
                      np.max(trajectory.position[...,1])])
+    if patches:
+        xbuff = np.max(patches.args)
+        ybuff = np.max(patches.args)
+        xlim[0] -= xbuff
+        xlim[1] += xbuff
+        ylim[0] -= ybuff
+        ylim[1] += ybuff
+        
+
 
     xbuff = np.abs(xlim[1] - xlim[0])*0.1
     xlim += (-xbuff, xbuff)
