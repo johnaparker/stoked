@@ -1,4 +1,4 @@
-from stoked import stokesian_dynamics, trajectory_animation, drag_sphere
+from stoked import stokesian_dynamics, trajectory_animation, drag_sphere, circle_patches
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -13,8 +13,6 @@ temperature = 9000
 dt = 100e-9
 
 Nsteps = 1000
-history = np.zeros([Nsteps,len(position),3], dtype=float)
-wz = np.zeros([Nsteps,len(position)], dtype=float)
 
 def Fext(t, rvec, orientation):
     F = np.zeros_like(rvec)
@@ -30,17 +28,11 @@ def torque(t, rvec, orientation):
     return T
 
 sim = stokesian_dynamics(position=position, drag=drag, temperature=temperature, dt=dt, torque=torque)
-for i in tqdm(range(Nsteps)):
-    history[i] = sim.position.squeeze()
-    wz[i] = sim.angular_velocity[...,2]
-    sim.step()
-
+history = sim.run(Nsteps)
+history.position *= 1e9
 
 fig, ax = plt.subplots()
-angles = np.zeros_like(wz)
-for i in range(len(position)):
-    angles[:,i] = cumtrapz(wz[:,i], np.arange(Nsteps)*dt, initial=0)
-anim = trajectory_animation(history[::1]/1e-9, radii=75, projection='z', interval=30, angles=angles[::1])
+anim = trajectory_animation(history, patches=circle_patches(75))
 # save_animation(anim, 'out.mp4')
 
 plt.show()

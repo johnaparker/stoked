@@ -17,7 +17,7 @@ def circle_patches(radius):
     return patches(plt.Circle, (radius,))
 
 def ellipse_patches(rx, ry):
-    return patches(mpl.patches.Ellipse, (rx, ry))
+    return patches(mpl.patches.Ellipse, (2*rx, 2*ry))
 
 def atleast(array, dim, length, dtype=None):
     """Given an n-dimensional array, return either an n or n+1 dimensional repeated array
@@ -140,15 +140,15 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         color = next(color_cycle)
 
         if patches is not None:
-            particles.append(patches_type[i](pos, *patches_args[i], edgecolor=color, animated=True, **circle_properties))
+            particles.append(patches_type[i](pos, *patches_args[i], edgecolor=color, animated=False, **circle_properties))
             ax.add_patch(particles[-1])
 
             if patches_type[i] is plt.Circle and angles is not None:
                 radius = patches_args[i][0]
-                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=True, **line_properties))
+                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=False, **line_properties))
                 ax.add_line(lines[-1])
         else:
-            dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=True, transform=None))
+            dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=False, transform=None))
             ax.add_patch(dots[-1])
 
         if trail > 0:

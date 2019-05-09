@@ -1,5 +1,5 @@
 {% set name = "stoked" %}
-{% set version = "0.1" %}
+{% set version = "0.1.2" %}
 
 package:
   name: "{{ name|lower }}"
@@ -7,7 +7,6 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 53d506cf0e9afe79d2e2de5021ef02c408e24c604d9b0714949e2299fc0e81a1
 
 build:
   noarch: python
