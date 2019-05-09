@@ -21,7 +21,7 @@ class electrostatics(interactions):
 
         r_ijx = self.position[:,np.newaxis,:] - self.position[np.newaxis,...]
         with np.errstate(divide='ignore'):
-            F_ijx = ke*np.einsum('i,j,ij,ijx->ijx', Q, Q, 1/np.sum(np.abs(r_ijx)**3, axis=-1), r_ijx)
+            F_ijx = ke*np.einsum('i,j,ij,ijx->ijx', Q, Q, 1/np.sum(np.abs(r_ijx + 1e-20)**3, axis=-1), r_ijx)
         np.einsum('iix->x', F_ijx)[...] = 0
         
         F = np.sum(F_ijx, axis=1)
