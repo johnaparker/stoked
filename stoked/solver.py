@@ -51,8 +51,11 @@ class interactions:
 
 def fluctuation(friction, T, dt):
     """Given a friction matrix, return the fluctuation matrix"""
-    rhs = 2*kb*T*friction/dt
-    return np.linalg.cholesky(rhs)
+    if T == 0:
+        return np.zeros_like(friction)
+    else:
+        rhs = 2*kb*T*friction/dt
+        return np.linalg.cholesky(rhs)
 
 class stokesian_dynamics:
     """

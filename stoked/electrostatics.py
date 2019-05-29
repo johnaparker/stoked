@@ -61,7 +61,10 @@ class double_layer_sphere(interactions):
         r_ij = np.linalg.norm(r_ijx, axis=-1)
 
         T1 = np.add.outer(radius, radius)
-        T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
+        if self.temperature == 0:
+            T2 = np.ones_like(potential)
+        else:
+            T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
         Q = factor*T1*np.multiply.outer(T2, T2)*np.exp(-(r_ij - T1)/self.debye)
 
         F_ijx = np.einsum('ij,ij,ijx->ijx', Q, 1/(r_ij + 1e-20), r_ijx)
@@ -104,7 +107,10 @@ class double_layer_sphere_interface(interactions):
         dz = self.position[:,2] - self.zpos
 
         T1 = np.tanh(self.zp*constants.elementary_charge*self.potential_interface/(4*constants.k*self.temperature))
-        T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
+        if self.temperature == 0:
+            T2 = np.ones_like(potential)
+        else:
+            T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
         Q = np.sign(dz)*factor*radius*T1*T2*np.exp(-(dz - radius)/self.debye)
 
         F = np.zeros_like(self.position)
