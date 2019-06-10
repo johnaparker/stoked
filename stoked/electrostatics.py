@@ -111,7 +111,7 @@ class double_layer_sphere_interface(interactions):
             T2 = np.ones_like(potential)
         else:
             T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
-        Q = np.sign(dz)*factor*radius*T1*T2*np.exp(-(dz - radius)/self.debye)
+        Q = np.sign(dz)*factor*radius*T1*T2*np.exp(-(np.abs(dz) - radius)/self.debye)
 
         F = np.zeros_like(self.position)
         F[:,2] = Q
