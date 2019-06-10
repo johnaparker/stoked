@@ -254,6 +254,7 @@ class stokesian_dynamics:
 
 
         self.time += self.dt
+        self._perform_constraints(r_predict, o_predict)
         self._update_interactions(self.time, r_predict, o_predict)
 
         F_predict = self._total_force(self.time, r_predict, o_predict)
@@ -269,6 +270,7 @@ class stokesian_dynamics:
         self.angular_velocity = 0.5*(w1 + w2)
         self.orientation = (1 + w_q*self.dt/2)*self.orientation
 
+        self._perform_constraints(self.position, self.orientation)
         self.orientation = np.normalized(self.orientation)
 
     def _get_velocity(self, alpha, drive, noise, orientation):
