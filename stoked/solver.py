@@ -151,9 +151,13 @@ class stokesian_dynamics:
         else:
             self._step()
 
-    def run(self, Nsteps):
+    def run(self, Nsteps, progress=True):
         """
         Run the simulation for Nsteps, returning the trajectories
+
+        Arguments:
+            Nsteps       number of steps to run
+            progress     If True, display a progress bar
         """
         position = np.zeros((Nsteps,) + self.position.shape, dtype=float)
 
@@ -162,7 +166,7 @@ class stokesian_dynamics:
         else:
             orientation = None
 
-        for i in tqdm(range(Nsteps), desc='Running dynamics'):
+        for i in tqdm(range(Nsteps), desc='Running dynamics', disable=(not progress)):
             position[i] = self.position
             if self.rotating:
                 orientation[i] = self.orientation
@@ -173,6 +177,10 @@ class stokesian_dynamics:
     def run_until(self, condition):
         """
         Run the simulation until some condition is met, returning the trajectories
+
+        Arguments:
+            condition    Function to return True when simulation should terminate
+            progress     If True, display a progress bar
         """
         position = []
 
@@ -181,7 +189,7 @@ class stokesian_dynamics:
         else:
             orientation = None
 
-        with tqdm(desc='Running dynamics until condition is met') as pbar:
+        with tqdm(desc='Running dynamics until condition is met', disable=(not progress)) as pbar:
             while not condition():
                 position.append(np.copy(self.position))
                 if self.rotating:

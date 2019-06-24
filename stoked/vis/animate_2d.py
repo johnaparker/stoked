@@ -93,11 +93,11 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
     trail_properties = dict(zorder=0)
     trail_properties.update(trail_kwargs)
 
-    circle_properties = dict(facecolor=(1,1,1,0), linewidth=2, zorder=1)
+    circle_properties = dict(linewidth=2, zorder=1)
     circle_properties.update(circle_kwargs)
 
     line_properties = deepcopy(circle_properties)
-    line_properties.pop('facecolor')
+    # line_properties.pop('facecolor')
 
     fading_properties = dict(max_lw=2, min_lw=0.3)
     fading_properties.update(fading_kwargs)
@@ -140,7 +140,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         color = next(color_cycle)
 
         if patches is not None:
-            particles.append(patches_type[i](pos, *patches_args[i], edgecolor=color, animated=False, **circle_properties))
+            particles.append(patches_type[i](pos, *patches_args[i], facecolor=color, edgecolor='k', animated=False, **circle_properties))
             ax.add_patch(particles[-1])
 
             if patches_type[i] is plt.Circle and angles is not None:
