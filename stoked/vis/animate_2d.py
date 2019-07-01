@@ -140,7 +140,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         color = next(color_cycle)
 
         if patches is not None:
-            particles.append(patches_type[i](pos, *patches_args[i], facecolor=color, edgecolor='k', animated=False, **circle_properties))
+            particles.append(patches_type[i](pos, *patches_args[i], fc=color, edgecolor='k', animated=False, **circle_properties))
             ax.add_patch(particles[-1])
 
             if patches_type[i] is plt.Circle and angles is not None:

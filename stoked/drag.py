@@ -67,34 +67,36 @@ class drag_ellipsoid(drag):
             viscosity      dynamic viscosity µ of surrounding fluid
         """
         super().__init__(viscosity)
-        self.radii = np.asarray(radii, dtype=float)
+        self.radii = np.atleast_2d(np.asarray(radii, dtype=float))
+        self.chi_0 = np.zeros(len(self.radii), dtype=float)
+        self.alpha_0 = np.zeros_like(self.radii)
 
-        a, b, c = self.radii
-        integrand = lambda t: 1/np.sqrt((1 + t)*((b/a)**2 + t)*((c/a)**2 + t))
-        self.chi_0 = a**2*quad(integrand, 0, np.inf)[0]
-        self.alpha_0 = np.zeros(3, dtype=float)
+        for i in range(len(self.radii)):
+            a, b, c = self.radii[i]
+            integrand = lambda t: 1/np.sqrt((1 + t)*((b/a)**2 + t)*((c/a)**2 + t))
+            self.chi_0[i] = a**2*quad(integrand, 0, np.inf)[0]
 
-        for i, comp in enumerate([a,b,c]):
-            integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
-            self.alpha_0[i] = comp**2*quad(integrand, 0, np.inf)[0]
+            for j, comp in enumerate([a,b,c]):
+                integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
+                self.alpha_0[i][j] = comp**2*quad(integrand, 0, np.inf)[0]
 
     def _drag_T(self):
-        a, b, c = self.radii
-
-        D = np.zeros(3, dtype=float)
-        for i, comp in enumerate([a,b,c]):
-            D[i] = 16*np.pi*self.viscosity*a*b*c/(self.chi_0 + self.alpha_0[i])
+        D = np.zeros_like(self.radii)
+        for i in range(len(self.radii)):
+            a, b, c = self.radii[i]
+            for j, comp in enumerate([a,b,c]):
+                D[i][j] = 16*np.pi*self.viscosity*a*b*c/(self.chi_0[i] + self.alpha_0[i][j])
 
         return D
 
     def _drag_R(self):
-        a, b, c = self.radii
+        D = np.zeros_like(self.radii)
+        for i in range(len(self.radii)):
+            a, b, c = self.radii[i]
+            factor = 16*np.pi*self.viscosity*a*b*c 
 
-        D = np.zeros(3, dtype=float)
-        factor = 16*np.pi*self.viscosity*a*b*c 
-
-        D[0] = factor/(3*(self.alpha_0[1] + self.alpha_0[2]))*(b**2 + c**2)
-        D[1] = factor/(3*(self.alpha_0[0] + self.alpha_0[2]))*(a**2 + c**2)
-        D[2] = factor/(3*(self.alpha_0[0] + self.alpha_0[1]))*(a**2 + b**2)
+            D[i][0] = factor/(3*(self.alpha_0[i][1] + self.alpha_0[i][2]))*(b**2 + c**2)
+            D[i][1] = factor/(3*(self.alpha_0[i][0] + self.alpha_0[i][2]))*(a**2 + c**2)
+            D[i][2] = factor/(3*(self.alpha_0[i][0] + self.alpha_0[i][1]))*(a**2 + b**2)
 
         return D
