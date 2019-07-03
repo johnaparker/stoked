@@ -87,7 +87,7 @@ class stokesian_dynamics:
         self.hydrodynamic_coupling = hydrodynamic_coupling
 
         if orientation is not None:
-            self.orientation = np.asarray(orientation, dtype=np.quaternion)
+            self.orientation = np.atleast_1d(np.asarray(orientation, dtype=np.quaternion))
         else:
             self.orientation = np.ones([self.Nparticles], dtype=np.quaternion)
 
