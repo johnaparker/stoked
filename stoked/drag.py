@@ -74,11 +74,11 @@ class drag_ellipsoid(drag):
         for i in range(len(self.radii)):
             a, b, c = self.radii[i]
             integrand = lambda t: 1/np.sqrt((1 + t)*((b/a)**2 + t)*((c/a)**2 + t))
-            self.chi_0[i] = a**2*quad(integrand, 0, np.inf)[0]
+            self.chi_0[i] = b*c*quad(integrand, 0, np.inf)[0]
 
             for j, comp in enumerate([a,b,c]):
                 integrand = lambda t: 1/((1 + t)*np.sqrt(((a/comp)**2 + t)*((b/comp)**2 + t)*((c/comp)**2 + t)))
-                self.alpha_0[i][j] = comp**2*quad(integrand, 0, np.inf)[0]
+                self.alpha_0[i][j] = a*b*c/comp*quad(integrand, 0, np.inf)[0]
 
     def _drag_T(self):
         D = np.zeros_like(self.radii)
