@@ -11,6 +11,7 @@ Features
 
 Installation
 --------------
+StokeD can be installed with pip
 ```shell
 pip install stoked
 ```
