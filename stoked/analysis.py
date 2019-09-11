@@ -114,6 +114,25 @@ def angle_of_cluster(trajectory, wrap=False, initial=0, N_cutoff=1):
     if not wrap:
         phi_cluster = np.unwrap(phi_cluster)
 
-    # from IPython import embed; embed()
-
     return phi_cluster
+
+def transform_to_lattice(trajectory, lattice):
+    """
+    Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice
+    
+    Arguments:
+        trajectory[T,N,2]      trajecrory data with T steps, N particles in 2 dimensions
+        lattice[N,2]           lattice to align to
+    """
+    Nsteps, Nparticles, _ = trajectory.shape
+
+    translation = np.average(trajectory[...,:2], axis=1)
+    P = trajectory - translation[:,np.newaxis]
+    Q = lattice[:,:2]
+
+    H = np.einsum('TNi,Nj->Tij', P, Q)
+    U, S, V = np.linalg.svd(H)
+    R = np.einsum('Tij,Tjk->Tik', V, U)
+    new_trajectory = np.einsum('Tij,TNj->TNi', R, P)
+
+    return new_trajectory
