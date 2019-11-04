@@ -133,7 +133,68 @@ def transform_to_lattice(trajectory, lattice):
     H = np.einsum('TNi,Nj->Tij', P, Q)
     U, S, V = np.linalg.svd(H)
     R = np.einsum('Tij,Tjk->Tik', V, U)
+
+    d = np.linalg.det(R)
+
     new_trajectory = np.einsum('Tij,TNj->TNi', R, P)
+
+def transform_to_lattice_2d(trajectory, lattice):
+    """
+    Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice in 2 dimensions
+    
+    Arguments:
+        trajectory[T,N,2]      trajecrory data with T steps, N particles in 2 dimensions
+        lattice[N,2]           lattice to align to
+    """
+    Nsteps, Nparticles, _ = trajectory.shape
+
+    z1 = trajectory[...,0] + 1j*trajectory[...,1]
+    z2 = lattice[...,0] + 1j*lattice[...,1]
+
+    az1 = np.average(z1, axis=1)
+    az2 = np.average(z2, axis=0)
+
+    z = az2 - az1
+    translation = np.array((z.real, z.imag)).T
+
+    z1 -= az1[:,np.newaxis]
+    z2 -= az2
+    a = np.linalg.norm(z1, axis=1)**2
+
+    err = np.linalg.norm(z2)**2
+    zz1 = np.einsum('TN,N->T', z1, z2)
+    zz_1 = np.einsum('TN,N->T', z1, np.conj(z2))
+
+    b1 = np.abs(zz1)
+    b_1 = np.abs(zz_1)
+    err1 = -b1**2/a
+    err_1 = -b_1**2/a
+
+    idx = err1 <= err_1
+
+    mirr = np.empty(Nsteps, dtype=float)
+    sc = np.empty(Nsteps, dtype=complex)
+    theta = np.empty(Nsteps, dtype=float)
+    error = err*np.ones(Nsteps, dtype=float)
+    rot = err*np.ones(Nsteps, dtype=complex)
+
+    mirr[idx] = 1
+    error[idx] += err1[idx]
+    sc[idx] = b1[idx]/a[idx]
+    theta[idx] = -np.angle(zz1[idx])
+    rot[idx] = zz1[idx]
+
+    mirr[~idx] = -1
+    error[~idx] += err_1[~idx]
+    sc[~idx] = b_1[~idx]/a[~idx]
+    theta[~idx] = -np.angle(zz_1[~idx])
+    rot[~idx] = zz_1[~idx]
+
+    z1 = np.einsum('TN,T->TN', z1, np.conj(rot)/np.abs(rot))
+    new_trajectory = np.empty_like(trajectory)
+    new_trajectory[...,0] = z1.real
+    new_trajectory[...,1] = z1.imag
+    error = np.sqrt(error)
 
     return new_trajectory
 
