@@ -136,3 +136,34 @@ def transform_to_lattice(trajectory, lattice):
     new_trajectory = np.einsum('Tij,TNj->TNi', R, P)
 
     return new_trajectory
+
+def linear_stability_analysus(bd):
+    """
+    Perform a linear stability analysis for a given brownian dynamics simulation.
+    Returns (eigenvalues, eigenvectors)
+    """
+    # bd.run(2000)
+
+    F = bd._total_force(bd.time, bd.position, bd.orientation)
+    T = np.cross(bd.position, F, axis=1)[:,2]
+
+    dx = 1e-11
+    force_matrix = np.zeros([bd.Nparticles, 2, bd.Nparticles, 2], dtype=float)
+    for i in range(bd.Nparticles):
+        for j in [0,1]:
+            bd.position[i,j] += dx
+            bd._update_interactions(bd.time, bd.position, bd.orientation)
+            F = bd._total_force(bd.time, bd.position, bd.orientation)
+            bd.position[i,j] -= dx
+
+            for k in range(len(F)):
+                r = np.linalg.norm(bd.position[k])
+                tangent = np.array([-bd.position[k][1], bd.position[k][0], 0])
+                if r > dx:
+                    F[k] -= T[k]/r**2*tangent
+
+            force_matrix[...,i,j] = F[:,:2]/dx
+
+    w, v = np.linalg.eig(force_matrix.reshape([2*force_matrix.shape[0], -1]))
+
+    return w, v
