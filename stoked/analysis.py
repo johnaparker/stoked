@@ -226,5 +226,7 @@ def linear_stability_analysus(bd):
             force_matrix[...,i,j] = F[:,:2]/dx
 
     w, v = np.linalg.eig(force_matrix.reshape([2*force_matrix.shape[0], -1]))
+    v = v.reshape([bd.Nparticles, 2, 2*bd.Nparticles])
+    v = np.moveaxis(v, -1, 0)
 
     return w, v
