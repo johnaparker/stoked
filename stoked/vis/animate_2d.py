@@ -164,7 +164,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         
         if number_labels:
             label = str(i+1)
-            text[label] = ax.text(*pos, label, animated=True, **label_properties)
+            text[label] = ax.text(pos[0], pos[1], label, animated=True, **label_properties)
             text[label].set_path_effects([path_effects.Stroke(linewidth=5, foreground='white'),
                        path_effects.Normal()])
 
