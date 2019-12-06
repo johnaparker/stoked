@@ -198,7 +198,7 @@ def transform_to_lattice_2d(trajectory, lattice):
 
     return new_trajectory
 
-def linear_stability_analysus(bd):
+def linear_stability_analysis(bd):
     """
     Perform a linear stability analysis for a given brownian dynamics simulation.
     Returns (eigenvalues, eigenvectors)
@@ -206,7 +206,8 @@ def linear_stability_analysus(bd):
     # bd.run(2000)
 
     F = bd._total_force(bd.time, bd.position, bd.orientation)
-    T = np.cross(bd.position, F, axis=1)[:,2]
+    com = np.average(bd.position, axis=0)
+    T = np.cross(bd.position - com, F, axis=1)[:,2]
 
     dx = 1e-11
     force_matrix = np.zeros([bd.Nparticles, 2, bd.Nparticles, 2], dtype=float)
@@ -218,8 +219,8 @@ def linear_stability_analysus(bd):
             bd.position[i,j] -= dx
 
             for k in range(len(F)):
-                r = np.linalg.norm(bd.position[k])
-                tangent = np.array([-bd.position[k][1], bd.position[k][0], 0])
+                r = np.linalg.norm(bd.position[k] - com)
+                tangent = np.array([-bd.position[k][1] - com[1], bd.position[k][0] - com[0], 0])
                 if r > dx:
                     F[k] -= T[k]/r**2*tangent
 
@@ -230,3 +231,38 @@ def linear_stability_analysus(bd):
     v = np.moveaxis(v, -1, 0)
 
     return w, v
+
+def psi_n(trajectory, n, rmax, single=None):
+    """
+    Compute psi_n, a measure of the discrete rotational symmetry
+
+    Arguments:
+        trajectory      particle trajectory
+        n               degree of rotational symmetry
+        rmax            maximum distance that defines nearest neighbors
+        single          index of a single particle to compute psi_n for (default: average over all)
+    """
+    Nsteps = len(trajectory)
+    Nparticles = trajectory.shape[1]
+
+    psi = np.zeros(Nsteps, dtype=complex)
+
+    if single is None:
+        for i in range(Nsteps):
+            for j in range(Nparticles):
+                r_ij = trajectory[i,j,:2] - np.delete(trajectory[i,:,:2], j, axis=0)
+                idx = np.linalg.norm(r_ij, axis=1) < rmax
+                theta_ij = np.arctan2(r_ij[idx,1], r_ij[idx,0])
+
+                if len(theta_ij) != 0:
+                    psi[i] += np.sum(np.exp(1j*n*theta_ij))/(Nparticles*len(theta_ij))
+    else:
+        for i in range(Nsteps):
+            r_ij = trajectory[i,single,:2] - np.delete(trajectory[i,:,:2], single, axis=0)
+            idx = np.linalg.norm(r_ij, axis=1) < rmax
+            theta_ij = np.arctan2(r_ij[idx,1], r_ij[idx,0])
+
+            if len(theta_ij) != 0:
+                psi[i] = np.sum(np.exp(1j*n*theta_ij))/(len(theta_ij))
+
+    return psi
