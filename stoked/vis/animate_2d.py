@@ -223,7 +223,9 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         history[...] = np.tile(positions, (trail,1,1))
         return  trails + particles + lines + list(text.values()) + dots
 
-    anim = animation.FuncAnimation(ax.figure, update, frames=frames, init_func=init, blit=True, repeat=True, interval=30, **kwargs)
+    kw = dict(interval=30, repeat=True, blit=True)
+    kw.update(kwargs)
+    anim = animation.FuncAnimation(ax.figure, update, frames=frames, init_func=init, **kw)
     return anim
 
 def trajectory_animation(trajectory, patches=None, *args, **kwargs):
