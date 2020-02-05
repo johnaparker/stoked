@@ -17,7 +17,7 @@ class pairwise_force(interactions):
 
         r_ij = self.position[:,np.newaxis] - self.position[np.newaxis]   # N x N x 3
         F_ij = self.force_func(r_ij)   # N x N x 3
-        np.einsum('iix->x', F_ij)[...] = 0
+        np.einsum('iix->ix', F_ij)[...] = 0
         F_i = np.sum(F_ij, axis=1)
 
         return F_i
