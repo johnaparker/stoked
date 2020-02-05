@@ -1,81 +1,55 @@
 import numpy as np
 from scipy import constants
 from stoked import interactions
+from stoked.forces import pairwise_central_force
 
-class electrostatics(interactions):
+def electrostatics(charges):
     """
     Free-space point electrostatic interactions
     """
-    def __init__(self, charges):
-        # self.charges = stoked.array(charges)
-        self.charges = charges
+    ke = 1/(4*np.pi*constants.epsilon_0)
 
-    def force(self):
-        Nparticles = len(self.position)
-        if np.isscalar(self.charges):
-            Q = np.full(Nparticles, self.charges, dtype=float)
+    def F(r):
+        if np.isscalar(charges):
+            Nparticles = len(r)
+            Q = np.full(Nparticles, charges, dtype=float)
         else:
-            Q = np.asarray(self.charges, dtype=float)
+            Q = np.asarray(charges, dtype=float)
 
-        ke = 1/(4*np.pi*constants.epsilon_0)
+        return ke*np.outer(Q, Q)/r**2
 
-        r_ijx = self.position[:,np.newaxis,:] - self.position[np.newaxis,...]
-        with np.errstate(divide='ignore'):
-            F_ijx = ke*np.einsum('i,j,ij,ijx->ijx', Q, Q, 1/np.sum(np.abs(r_ijx + 1e-20)**3, axis=-1), r_ijx)
-        np.einsum('iix->x', F_ijx)[...] = 0
-        
-        F = np.sum(F_ijx, axis=1)
+    return pairwise_central_force(F)
 
-        return F
-
-    def torque(self):
-        return np.zeros_like(self.position)
-
-
-class double_layer_sphere(interactions):
+def double_layer_sphere(radius, potential, temperature=300, debye=27.6e-9, eps_m=80.4, zp=1):
     """
     Electrostatic interactions in a fluid medium for spheres
     """
-    def __init__(self, radius, potential, debye=27.6e-9, eps_m=80.4, zp=1):
-        self.radius = np.asarray(radius, dtype=float)
-        self.potential = np.asarray(potential, dtype=float)
-        self.debye = debye
-        self.eps_m = eps_m
-        self.zp = zp
+    radius = np.asarray(radius, dtype=float)
+    potential = np.asarray(potential, dtype=float)
 
-    def force(self):
-        Nparticles = len(self.position)
-        if not np.ndim(self.radius):
-            radius = np.full(Nparticles, self.radius, dtype=float)
-        else:
-            radius = self.radius
-        if not np.ndim(self.potential):
-            potential = np.full(Nparticles, self.potential, dtype=float)
-        else:
-            potential = self.potential
+    def F(r):
+        nonlocal radius, potential
+        Nparticles = len(r)
+        if not np.ndim(radius):
+            radius = np.full(Nparticles, radius, dtype=float)
 
-        factor = 16*np.pi*constants.epsilon_0*self.eps_m/self.debye \
-                 *(constants.k*self.temperature/(self.zp*constants.elementary_charge))**2
+        if not np.ndim(potential):
+            potential = np.full(Nparticles, potential, dtype=float)
 
-        r_ijx = self.position[:,np.newaxis,:] - self.position[np.newaxis,...]
-        r_ij = np.linalg.norm(r_ijx, axis=-1)
-
+        factor = 16*np.pi*constants.epsilon_0*eps_m/debye \
+                 *(constants.k*temperature/(zp*constants.elementary_charge))**2
+    
         T1 = np.add.outer(radius, radius)
-        if self.temperature == 0:
+        if temperature == 0:
             T2 = np.ones_like(potential)
         else:
-            T2 = np.tanh(self.zp*constants.elementary_charge*potential/(4*constants.k*self.temperature))
-        Q = factor*T1*np.multiply.outer(T2, T2)*np.exp(-(r_ij - T1)/self.debye)
+            T2 = np.tanh(zp*constants.elementary_charge*potential/(4*constants.k*temperature))
+        T2 = np.outer(T2, T2)
 
-        F_ijx = np.einsum('ij,ij,ijx->ijx', Q, 1/(r_ij + 1e-20), r_ijx)
+        Q = factor*T1*T2*np.exp(-(r - T1)/debye)
+        return Q
 
-        np.einsum('iix->x', F_ijx)[...] = 0
-        F = np.sum(F_ijx, axis=1)
-
-        return F
-
-    def torque(self):
-        return np.zeros_like(self.position)
+    return pairwise_central_force(F)
 
 class double_layer_sphere_interface(interactions):
     """

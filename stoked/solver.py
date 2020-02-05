@@ -111,6 +111,7 @@ class stokesian_dynamics:
             self.interactions = [interactions]
         else:
             self.interactions = interactions
+        self._combine_pairwise_interactions()
 
         if constraint is None:
             self.constraint = []
@@ -361,6 +362,20 @@ class stokesian_dynamics:
             for I in self.interactions:
                 T += I.torque()
         return T
+
+    def _combine_pairwise_interactions(self):
+        from stoked.forces import pairwise_central_force
+
+        if self.interactions is not None:
+            pairwise_forces = []
+            for i,I in enumerate(self.interactions):
+                if isinstance(I, pairwise_central_force):
+                    pairwise_forces.append(I)
+
+            if len(pairwise_forces) > 1:
+                for pf in pairwise_forces:
+                    self.interactions.remove(pf)
+                self.interactions.append(sum(pairwise_forces[1:], start=pairwise_forces[0]))
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None):

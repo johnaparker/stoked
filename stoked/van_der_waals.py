@@ -1,36 +1,26 @@
 import numpy as np
 from stoked import interactions
+from stoked.forces import pairwise_central_force
 
-class van_der_waals_sphere(interactions):
-    def __init__(self, radius, hamaker):
-        self.radius = np.asarray(radius, dtype=float)
-        self.hamaker = hamaker
+def van_der_waals_sphere(radius, hamaker):
+    radius = np.asarray(radius, dtype=float)
 
-    def force(self):
-        Nparticles = len(self.position)
-        if not np.ndim(self.radius):
-            radius = np.full(Nparticles, self.radius, dtype=float)
-        else:
-            radius = self.radius
+    def F(r):
+        nonlocal radius
+
+        Nparticles = len(r)
+        if not np.ndim(radius):
+            radius = np.full(Nparticles, radius, dtype=float)
 
         factor = 2*self.hamaker/3
-        r_ijx = self.position[:,np.newaxis,:] - self.position[np.newaxis,...]
-        r_ij = np.linalg.norm(r_ijx, axis=-1)
-
-        T1 = np.multiply.outer(radius, radius)
+        T1 = np.outer(radius, radius)
         T2 = np.add.outer(radius, radius)**2
         T3 = np.substract.outer(radius, radius)**2
-        Q = r_ij*T1*(1/(r_ij**2 - T2**2) - 1 /(r_ij**2 - T3**2))**2
+        Q = r*T1*(1/(r**2 - T2**2) - 1 /(r**2 - T3**2))**2
 
-        F_ijx = np.einsum('ij,ij,ijx->ijx', -factor*Q, 1/(r_ij + 1e-20), r_ijx)
-        np.einsum('iix->x', F_ijx)[...] = 0
-        F = np.sum(F_ijx, axis=1)
+        return Q
 
-        return F
-
-    def torque(self):
-        return np.zeros_like(self.position)
-
+    return F
 
 class van_der_waals_sphere_interface(interactions):
     def __init__(self, radius, hamaker, zpos=0):

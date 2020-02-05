@@ -1,46 +1,22 @@
 import numpy as np
 from stoked import interactions
+from stoked.forces import pairwise_central_force
 
-class collisions_sphere(interactions):
-    """
-    Collision between spheres using the force model F = kn*overlap^1.5
-    """
-    def __init__(self, radii, kn):
-        """
-        Arguments:
-            radii   particle radii
-            kn      force constant
-        """
-        # self.radii = stoked.array(radii)
-        self.radii = radii
-        self.kn = kn
+def collisions_sphere(radius, kn):
+    def F(r):
+        nonlocal radius
 
-    def force(self):
-        Nparticles = len(self.position)
-        if np.isscalar(self.radii):
-            rad = np.full(Nparticles, self.radii, dtype=float)
-        else:
-            rad = np.asarray(self.radii, dtype=float)
+        if np.isscalar(radius):
+            Nparticles = len(r)
+            radius = np.full(Nparticles, radius, dtype=float)
 
-        F = np.zeros_like(self.position)
+        T1 = np.add.outer(radius, radius)
 
-        for i in range(0,Nparticles):
-            for j in range(i+1,Nparticles):
-                d = self.position[i] - self.position[j]
-                r = np.linalg.norm(d)
-                if r < rad[i] + rad[j]:
-                    overlap = abs(r - rad[i] + rad[j])
+        overlap = np.abs(r - T1)
+        overlap[overlap>T1] = 0
+        return kn*overlap**1.5
 
-                    r_hat = d/r
-                    Fn = r_hat*self.kn*overlap**1.5
-
-                    F[i] += Fn
-                    F[j] -= Fn
-        return F
-
-    def torque(self):
-        return np.zeros_like(self.position)
-
+    return pairwise_central_force(F)
 
 class collisions_sphere_interface(interactions):
     """
