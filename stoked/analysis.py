@@ -266,3 +266,52 @@ def psi_n(trajectory, n, rmax, single=None):
                 psi[i] = np.sum(np.exp(1j*n*theta_ij))/(len(theta_ij))
 
     return psi
+
+def radial_distrubtion(pos, bins=100, range=None, weighted=False, dim=None):
+    """
+    Compute a radial distribution function. Returns (counts, bin_edges)
+
+    Arguments:
+        pos[T,N,ndim]     particle positions
+        bins              number of bins in histrogram
+        range             lower and upper range of the bins
+        weighted          if True, weight the RDF (default: False)
+        dim               if weighted, the dimensionality to use (default: infer from pos)
+        **kwargs          additional kwargs to np.histogram
+    """
+    Ntime, Nparticles, Ndim = pos.shape
+    if dim is None:
+        dim = Ndim
+
+    dr = pos[:,np.newaxis] - pos[:,:,np.newaxis]
+    dr_norm = np.linalg.norm(dr, axis=-1)
+    dr_norm = dr_norm.flatten()
+    idx = dr_norm == 0
+    dr_norm = dr_norm[~idx]
+
+    weights = 1/dr_norm**dim if weighted else None
+    return np.histogram(dr_norm, bins=bins, weights=weights, density=True, range=range)
+
+def radial_distrubtion_pair(p1, p2, bins=100, range=None, weighted=False, dim=None):
+    """
+    Compute a pair radial distribution function. Returns (counts, bin_edges)
+
+    Arguments:
+        p1[T,N1,ndim]     particle group 1 positions
+        p1[T,N2,ndim]     particle group 2 positions
+        bins              number of bins in histrogram
+        range             lower and upper range of the bins
+        weighted          if True, weight the RDF (default: False)
+        dim               if weighted, the dimensionality to use (default: infer from pos)
+        **kwargs          additional kwargs to np.histogram
+    """
+    Ntime, Nparticles, Ndim = p1.shape
+    if dim is None:
+        dim = Ndim
+
+    dr = p1[:,np.newaxis] - p2[:,:,np.newaxis]
+    dr_norm = np.linalg.norm(dr, axis=-1)
+    dr_norm = dr_norm.flatten()
+
+    weights = 1/dr_norm**dim if weighted else None
+    return np.histogram(dr_norm, bins=bins, weights=weights, density=True, range=range)

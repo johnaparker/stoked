@@ -93,7 +93,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
     trail_properties = dict(zorder=0)
     trail_properties.update(trail_kwargs)
 
-    circle_properties = dict(linewidth=2, zorder=1)
+    circle_properties = dict(linewidth=1, zorder=1)
     circle_properties.update(circle_kwargs)
 
     line_properties = deepcopy(circle_properties)
