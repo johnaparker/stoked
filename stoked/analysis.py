@@ -4,6 +4,7 @@ Functions for post-processing analysis of trajectory data
 
 import numpy as np
 from scipy.integrate import cumtrapz
+from tqdm import tqdm
 
 def autocorrelation_fft(x):
     """
@@ -211,7 +212,7 @@ def linear_stability_analysis(bd):
 
     dx = 1e-11
     force_matrix = np.zeros([bd.Nparticles, 2, bd.Nparticles, 2], dtype=float)
-    for i in range(bd.Nparticles):
+    for i in tqdm(range(bd.Nparticles), desc='Linear stability analysis K-matrix'):
         for j in [0,1]:
             bd.position[i,j] += dx
             bd._update_interactions(bd.time, bd.position, bd.orientation)
@@ -289,7 +290,7 @@ def radial_distrubtion(pos, bins=100, range=None, weighted=False, dim=None):
     idx = dr_norm == 0
     dr_norm = dr_norm[~idx]
 
-    weights = 1/dr_norm**dim if weighted else None
+    weights = 1/dr_norm**(dim-1) if weighted else None
     return np.histogram(dr_norm, bins=bins, weights=weights, density=True, range=range)
 
 def radial_distrubtion_pair(p1, p2, bins=100, range=None, weighted=False, dim=None):
@@ -313,5 +314,5 @@ def radial_distrubtion_pair(p1, p2, bins=100, range=None, weighted=False, dim=No
     dr_norm = np.linalg.norm(dr, axis=-1)
     dr_norm = dr_norm.flatten()
 
-    weights = 1/dr_norm**dim if weighted else None
+    weights = 1/dr_norm**(dim-1) if weighted else None
     return np.histogram(dr_norm, bins=bins, weights=weights, density=True, range=range)
