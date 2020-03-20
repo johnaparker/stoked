@@ -375,7 +375,7 @@ class stokesian_dynamics:
             if len(pairwise_forces) > 1:
                 for pf in pairwise_forces:
                     self.interactions.remove(pf)
-                self.interactions.append(sum(pairwise_forces[1:], start=pairwise_forces[0]))
+                self.interactions.append(sum(pairwise_forces[1:], pairwise_forces[0]))
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None):
