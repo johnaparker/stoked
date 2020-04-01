@@ -1,3 +1,4 @@
+import stoked
 from stoked import brownian_dynamics, drag_sphere
 from functools import partial
 import matplotlib.pyplot as plt
@@ -24,7 +25,8 @@ def test_uniform_motion():
                             drag=drag,
                             temperature=temperature,
                             dt=dt,
-                            force=partial(uniform_force, Fx=Fx))
+                            force=partial(uniform_force, Fx=Fx),
+                            inertia=stoked.inertia_sphere(100e-9, 10490))
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()

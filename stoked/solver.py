@@ -63,7 +63,7 @@ class stokesian_dynamics:
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None,
-                 interface=None, hydrodynamic_coupling=True):
+                 interface=None, inertia=None, hydrodynamic_coupling=True):
         """
         Arguments:
             temperature        system temperature
@@ -76,6 +76,7 @@ class stokesian_dynamics:
             interactions       particle interactions (can be a list)
             constraint         particle constraints (can be a list)
             interface          no-slip boundary interface (default: no interface)
+            inertia            inertia coefficients of base type stoked.inertia (default: over-damped dynamics)
             hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
         """
         self.temperature = temperature
@@ -86,6 +87,7 @@ class stokesian_dynamics:
         self.Nparticles = len(self.position)
         self.ndim = self.position.shape[1]
         self.interface = interface
+        self.inertia = inertia
         self.hydrodynamic_coupling = hydrodynamic_coupling
 
         if self.interface is not None and self.ndim != 3:
@@ -148,6 +150,13 @@ class stokesian_dynamics:
         else:
             self.rotating = True
 
+        if self.inertia is not None:
+            self.mass = np.empty([self.Nparticles], dtype=float)
+            self.moment = np.empty([self.Nparticles,3], dtype=float)
+
+            self.mass[...] = self.inertia.mass
+            self.moment[...] = self.inertia.moment
+
     def step(self):
         """
         Time-step the positions (and orientations) by dt
@@ -209,43 +218,51 @@ class stokesian_dynamics:
 
         return trajectory(position, orientation)
 
+    def _get_random_force(self, alpha):
+        noise = np.random.normal(size=self.position.shape) 
+        beta = np.sqrt(2*kb*self.temperature/(alpha*self.dt))
+        return beta*noise
+
+    def _get_velocity(self, alpha, drive, mass=None):
+        v0 = self.velocity
+        if self.inertia is None:
+            return alpha*drive
+        else:
+            return alpha*drive + (v0 - alpha*drive)*np.exp(-self.dt/mass/alpha)
+
+    def _get_position(self, alpha, drive, mass=None):
+        v0 = self.velocity
+        if self.inertia is None:
+            return self.position + self.dt*v0
+        else:
+            dr = alpha*drive*self.dt - alpha*self.mass*(alpha*drive - v0)*(1 - np.exp(-self.dt/mass/alpha))
+            return self.position + dr
+
     def _step(self):
         self._update_interactions(self.time, self.position, self.orientation)
         alpha_T, alpha_R = self._get_mobility()
 
         F = self._total_force(self.time, self.position, self.orientation)
-        noise_T = np.random.normal(size=self.position.shape) 
-        v1 = self._get_velocity(alpha_T, F, noise_T, self.orientation)
-        r_predict = self.position + self.dt*v1
+        F += self._get_random_force(alpha_T)
+        M = None if self.inertia is None else self.inertia.mass
+        v1 = self._get_velocity(alpha_T, F, M)
+        r1 = self._get_position(alpha_T, F, M)
 
         if self.rotating:
             T = self._total_torque(self.time, self.position, self.orientation)
             noise_R = np.random.normal(size=self.position.shape) 
             w1 = self._get_velocity(alpha_R, T, noise_R, self.orientation)
             w1_q = np.array([np.quaternion(*omega) for omega in w1])
-            o_predict = (1 + w1_q*self.dt/2)*self.orientation
+            o1 = (1 + w1_q*self.dt/2)*self.orientation
         else:
-            o_predict = self.orientation
+            o1 = self.orientation
 
+        self.velocity = v1
+        self.position = r1
+        self.orientation = o1
         self.time += self.dt
-        self._perform_constraints(r_predict, o_predict)
-        self._update_interactions(self.time, r_predict, o_predict)
-        alpha_T, alpha_R = self._get_mobility()
+        self._perform_constraints(r1, o1)
 
-        F_predict = self._total_force(self.time, r_predict, o_predict)
-        v2 = self._get_velocity(alpha_T, F_predict, noise_T, o_predict)
-        self.velocity = 0.5*(v1 + v2)
-        self.position += self.dt*self.velocity
-
-        if self.rotating:
-            T_predict =  self._total_torque(self.time, r_predict, o_predict)
-            w2 = self._get_velocity(alpha_R, T_predict, noise_R, o_predict)
-            w2_q = np.array([np.quaternion(*omega) for omega in w2])
-            w_q = (w1_q + w2_q)/2
-            self.angular_velocity = 0.5*(w1 + w2)
-            self.orientation = (1 + w_q*self.dt/2)*self.orientation
-
-        self._perform_constraints(self.position, self.orientation)
         if self.rotating:
             self.orientation = np.normalized(self.orientation)
 
@@ -306,26 +323,26 @@ class stokesian_dynamics:
         for constraint in self.constraint:
             constraint(position, orientation)
 
-    def _get_velocity(self, alpha, drive, noise, orientation):
-        """
-        FOR INTERNAL USE ONLY
+    # def _get_velocity(self, alpha, drive, noise, orientation):
+        # """
+        # FOR INTERNAL USE ONLY
 
-        obtain velocity (or angular velocity) given alpha parameter, drive force/torque, noise, and orientation
-        """
-        if self.isotropic:
-            beta = np.sqrt(2*kb*self.temperature*alpha/self.dt)
-            velocity = alpha*drive + beta*noise
-        else:
-            rot = quaternion.as_rotation_matrix(orientation)
-            alpha = np.einsum('Nij,Nj,Nlj->Nil', rot, alpha, rot)
+        # obtain velocity (or angular velocity) given alpha parameter, drive force/torque, noise, and orientation
+        # """
+        # if self.isotropic:
+            # beta = np.sqrt(2*kb*self.temperature*alpha/self.dt)
+            # velocity = alpha*drive + beta*noise
+        # else:
+            # rot = quaternion.as_rotation_matrix(orientation)
+            # alpha = np.einsum('Nij,Nj,Nlj->Nil', rot, alpha, rot)
 
-            beta = np.zeros_like(alpha)
-            for i in range(self.Nparticles):
-                beta[i] = fluctuation(alpha[i], self.temperature, self.dt)
+            # beta = np.zeros_like(alpha)
+            # for i in range(self.Nparticles):
+                # beta[i] = fluctuation(alpha[i], self.temperature, self.dt)
 
-            velocity = np.einsum('Nij,Nj->Ni', alpha, drive) + np.einsum('Nij,Nj->Ni', beta, noise)
+            # velocity = np.einsum('Nij,Nj->Ni', alpha, drive) + np.einsum('Nij,Nj->Ni', beta, noise)
 
-        return velocity
+        # return velocity
 
     def _get_velocity_hydrodynamics(self, F, T, noise_T, noise_R, orientation):
         """
@@ -402,7 +419,7 @@ class stokesian_dynamics:
                 self.interactions.append(sum(pairwise_forces[1:], pairwise_forces[0]))
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, constraint=None, interface=None):
+                 force=None, torque=None, interactions=None, constraint=None, interface=None, inertia=None):
     """
     Perform a Brownian dynamics simulation, with optional external and internal interactions and rotational dynamics
         
@@ -417,7 +434,8 @@ def brownian_dynamics(*, temperature, dt, position, drag, orientation=None,
         interactions       particle interactions (can be a list)
         interface          no-slip boundary interface (default: no interface)
         constraint         particle constraints (can be a list)
+        inertia            inertia coefficients of base type stoked.inertia (default: over-damped dynamics)
     """
     return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
                   orientation=orientation, force=force, torque=torque, interactions=interactions,
-                  constraint=constraint, interface=interface, hydrodynamic_coupling=False)
+                  constraint=constraint, interface=interface, inertia=inertia, hydrodynamic_coupling=False)

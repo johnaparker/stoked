@@ -53,7 +53,7 @@ class inertia_sphere(inertia):
         return 4/3*np.pi*self.radius**3*self.density
 
     def _moment(self):
-        M = self.mass()
+        M = self.mass
         return 2/5*M*self.radius**2
 
 class inertia_ellipsoid(inertia):
@@ -75,7 +75,7 @@ class inertia_ellipsoid(inertia):
         return V*self.density
 
     def _moment(self):
-        M = self.mass()
+        M = self.mass
         Ix = 1/5*M*(self.radii[:,1]**2 + self.radii[:,2]**2)
         Iy = 1/5*M*(self.radii[:,0]**2 + self.radii[:,2]**2)
         Iz = 1/5*M*(self.radii[:,0]**2 + self.radii[:,1]**2)

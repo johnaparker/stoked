@@ -19,11 +19,11 @@ class drag:
 
     @abstractmethod
     def _drag_T(self):
-        raise NotImplementedError('translational drag has not be implemented for this type of particle')
+        raise NotImplementedError('translational drag has not beem implemented for this type of particle')
 
     @abstractmethod
     def _drag_R(self):
-        raise NotImplementedError('rotational drag has not be implemented for this type of particle')
+        raise NotImplementedError('rotational drag has not been implemented for this type of particle')
 
     @property
     def drag_T(self):
