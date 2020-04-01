@@ -63,7 +63,7 @@ class stokesian_dynamics:
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None,
-                 hydrodynamic_coupling=True):
+                 interface=None, hydrodynamic_coupling=True):
         """
         Arguments:
             temperature        system temperature
@@ -75,6 +75,7 @@ class stokesian_dynamics:
             torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
             interactions       particle interactions (can be a list)
             constraint         particle constraints (can be a list)
+            interface          no-slip boundary interface (default: no interface)
             hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
         """
         self.temperature = temperature
@@ -84,6 +85,7 @@ class stokesian_dynamics:
         self.drag = drag
         self.Nparticles = len(self.position)
         self.ndim = self.position.shape[1]
+        self.interface = interface
         self.hydrodynamic_coupling = hydrodynamic_coupling
 
         if orientation is not None:

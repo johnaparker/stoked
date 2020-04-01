@@ -1,5 +1,14 @@
 import numpy as np
 
+class interface:
+    """A no-slip interface"""
+    def __init__(self, z=0):
+        """
+        Arguments:
+            z   z-position of the interface
+        """
+        self.z = z
+
 def levi_civita():
     """return the levi-civita symbol"""
 
@@ -7,6 +16,32 @@ def levi_civita():
     eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
     eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
     return eijk
+
+def particle_wall_self_mobility(position, interface, viscosity, radius):
+    """
+    Construct the particle wall self-mobility matrix for a single particle
+
+    Arguments:
+        position[3]       position of particle
+        interface         interface object
+        viscosity         dynamic viscosity µ of surrounding fluid
+        radius            particle radius
+    """
+    M = np.zeros([2, 2, 3, 3], dtype=float)
+    h = position[2] - interface.z
+
+    gamma_T = 6*np.pi*viscosity*radius
+    gamma_R = 6*np.pi*viscosity*radius**3
+
+    a = 1/(16*gamma_T)*(9/h - 2/h**3 + 1/h**5)
+    b = 1/(8*gamma_T)*(9/h - 4/h**3 + 1/h**5)
+    M[0,0] = np.diag([a,a,b])
+
+    a = 15/(64*gamma_R)*(1/h**3)
+    b = 3/(32*gamma_R)*(1/h**3)
+    M[1,1] = np.diag([a,a,b])
+
+    return M
 
 def grand_mobility_matrix(position, drag_T, drag_R, viscosity):
     """

@@ -14,7 +14,7 @@ from .electrostatics import (electrostatics, double_layer_sphere,
 from .electrodynamics import point_dipole_electrodynamics
 from .van_der_waals import van_der_waals_sphere, van_der_waals_sphere_interface
 from .gravity import gravity, gravity_sphere, gravity_ellipsoid
-from .hydrodynamics import grand_mobility_matrix
+from .hydrodynamics import grand_mobility_matrix, interface
 from .constraints import constrain_position, constrain_rotation
 from .forces import pairwise_central_force, pairwise_force
 from .common import lennard_jones
