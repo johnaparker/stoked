@@ -3,7 +3,7 @@ from scipy.constants import k as kb
 from collections.abc import Iterable
 import quaternion
 from abc import ABCMeta, abstractmethod
-from .hydrodynamics import grand_mobility_matrix
+from .hydrodynamics import grand_mobility_matrix, particle_wall_self_mobility
 from tqdm import tqdm
 
 class trajectory:
@@ -59,7 +59,7 @@ def fluctuation(friction, T, dt):
 
 class stokesian_dynamics:
     """
-    Perform a Stokesian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
+    Perform a Stokesian dynamics simulation, with optional external and internal interactions and rotational dynamics
     """
     def __init__(self, *, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None,
@@ -87,6 +87,9 @@ class stokesian_dynamics:
         self.ndim = self.position.shape[1]
         self.interface = interface
         self.hydrodynamic_coupling = hydrodynamic_coupling
+
+        if self.interface is not None and self.ndim != 3:
+            raise ValueError('An interface can only be used in 3-dimensions')
 
         if orientation is not None:
             self.orientation = np.atleast_1d(np.asarray(orientation, dtype=np.quaternion))
@@ -208,16 +211,17 @@ class stokesian_dynamics:
 
     def _step(self):
         self._update_interactions(self.time, self.position, self.orientation)
+        alpha_T, alpha_R = self._get_mobility()
 
         F = self._total_force(self.time, self.position, self.orientation)
         noise_T = np.random.normal(size=self.position.shape) 
-        v1 = self._get_velocity(self.alpha_T, F, noise_T, self.orientation)
+        v1 = self._get_velocity(alpha_T, F, noise_T, self.orientation)
         r_predict = self.position + self.dt*v1
 
         if self.rotating:
             T = self._total_torque(self.time, self.position, self.orientation)
             noise_R = np.random.normal(size=self.position.shape) 
-            w1 = self._get_velocity(self.alpha_R, T, noise_R, self.orientation)
+            w1 = self._get_velocity(alpha_R, T, noise_R, self.orientation)
             w1_q = np.array([np.quaternion(*omega) for omega in w1])
             o_predict = (1 + w1_q*self.dt/2)*self.orientation
         else:
@@ -226,15 +230,16 @@ class stokesian_dynamics:
         self.time += self.dt
         self._perform_constraints(r_predict, o_predict)
         self._update_interactions(self.time, r_predict, o_predict)
+        alpha_T, alpha_R = self._get_mobility()
 
         F_predict = self._total_force(self.time, r_predict, o_predict)
-        v2 = self._get_velocity(self.alpha_T, F_predict, noise_T, o_predict)
+        v2 = self._get_velocity(alpha_T, F_predict, noise_T, o_predict)
         self.velocity = 0.5*(v1 + v2)
         self.position += self.dt*self.velocity
 
         if self.rotating:
             T_predict =  self._total_torque(self.time, r_predict, o_predict)
-            w2 = self._get_velocity(self.alpha_R, T_predict, noise_R, o_predict)
+            w2 = self._get_velocity(alpha_R, T_predict, noise_R, o_predict)
             w2_q = np.array([np.quaternion(*omega) for omega in w2])
             w_q = (w1_q + w2_q)/2
             self.angular_velocity = 0.5*(w1 + w2)
@@ -243,10 +248,6 @@ class stokesian_dynamics:
         self._perform_constraints(self.position, self.orientation)
         if self.rotating:
             self.orientation = np.normalized(self.orientation)
-
-    def _perform_constraints(self, position, orientation):
-        for constraint in self.constraint:
-            constraint(position, orientation)
 
     def _step_hydrodynamics(self):
         self._update_interactions(self.time, self.position, self.orientation)
@@ -283,6 +284,27 @@ class stokesian_dynamics:
 
         self._perform_constraints(self.position, self.orientation)
         self.orientation = np.normalized(self.orientation)
+
+    def _get_mobility(self):
+        """obtain the mobility matrix"""
+        if self.interface:
+            M_T = np.copy(self.alpha_T)
+            M_R = np.copy(self.alpha_R)
+            for i in range(self.Nparticles):
+                radius = self.drag.radius[i] if self.drag.radius.ndim else self.drag.radius
+                M_self = particle_wall_self_mobility(self.position[i], self.interface, self.drag.viscosity, radius)
+                M_T[i] -= M_self[0,0].diagonal()
+                M_R[i] -= M_self[1,1].diagonal()
+                return M_T, M_R
+        else:
+            return self.alpha_T, self.alpha_R
+
+        return M
+
+
+    def _perform_constraints(self, position, orientation):
+        for constraint in self.constraint:
+            constraint(position, orientation)
 
     def _get_velocity(self, alpha, drive, noise, orientation):
         """
@@ -380,9 +402,9 @@ class stokesian_dynamics:
                 self.interactions.append(sum(pairwise_forces[1:], pairwise_forces[0]))
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, constraint=None):
+                 force=None, torque=None, interactions=None, constraint=None, interface=None):
     """
-    Perform a Brownian dynamics simulation, with optional external and internal internal interactions and rotational dynamics
+    Perform a Brownian dynamics simulation, with optional external and internal interactions and rotational dynamics
         
     Arguments:
         temperature        system temperature
@@ -393,8 +415,9 @@ def brownian_dynamics(*, temperature, dt, position, drag, orientation=None,
         force(t, r, q)     external force function given time t, position r[N,D], orientation q[N] and returns force F[N,D] (can be a list of functions)
         torque(t, r, q)    external torque function given time t, position r[N,D], orientation q[N] and returns torque T[N,D] (can be a list of functions)
         interactions       particle interactions (can be a list)
+        interface          no-slip boundary interface (default: no interface)
         constraint         particle constraints (can be a list)
     """
     return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
                   orientation=orientation, force=force, torque=torque, interactions=interactions,
-                  constraint=constraint, hydrodynamic_coupling=False)
+                  constraint=constraint, interface=interface, hydrodynamic_coupling=False)

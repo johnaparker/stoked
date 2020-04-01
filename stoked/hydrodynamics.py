@@ -28,7 +28,7 @@ def particle_wall_self_mobility(position, interface, viscosity, radius):
         radius            particle radius
     """
     M = np.zeros([2, 2, 3, 3], dtype=float)
-    h = position[2] - interface.z
+    h = (position[2] - interface.z)/radius
 
     gamma_T = 6*np.pi*viscosity*radius
     gamma_R = 6*np.pi*viscosity*radius**3
