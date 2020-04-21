@@ -7,11 +7,12 @@ class basic_integrator(integrator):
 
     def bd_step(self):
         F = self.solve_forces()
-        v0 = self.solver.velocity
-        v1 = self.alpha_T*F
+        Fr = self.random_force()
+        F += Fr
 
+        v1 = self.alpha_T*F
         self.solver.velocity = v1
-        self.solver.position += self.dt*v0
+        self.solver.position += self.dt*v1
 
         if self.solver.rotating:
             T = self.solve_torques()
@@ -21,6 +22,9 @@ class basic_integrator(integrator):
 
     def ld_step(self):
         F = self.solve_forces()
+        Fr = self.random_force()
+        F += Fr
+
         mass = self.solver.mass
         v0 = self.solver.velocity
         v1 = self.alpha_T*F + (v0 - self.alpha_T*F)*np.exp(-self.dt/mass/self.alpha_T)

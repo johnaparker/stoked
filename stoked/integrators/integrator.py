@@ -27,7 +27,10 @@ class integrator:
 
     def solve_forces(self):
         F = self.solver._total_force(self.solver.time, self.solver.position, self.solver.orientation)
-        F += random_force(self.alpha_T, self.solver.temperature, self.dt)
+        return F
+
+    def random_force(self):
+        F = random_force(self.alpha_T, self.solver.temperature, self.dt)
         return F
 
     def solve_torques(self):

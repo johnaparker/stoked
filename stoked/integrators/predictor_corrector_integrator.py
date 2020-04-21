@@ -10,6 +10,8 @@ class predictor_corrector_integrator(integrator):
         o0 = np.copy(self.solver.orientation)
 
         F = self.solve_forces()
+        Fr = self.random_force()
+        F += Fr
         v1 = self.alpha_T*F
 
         self.solver.velocity = v1
@@ -30,9 +32,10 @@ class predictor_corrector_integrator(integrator):
         self.pre_step()
 
         F = self.solve_forces()
+        F += Fr
         v2 = self.alpha_T*F
         self.solver.velocity = (v1 + v2)/2
-        self.position = r0 + self.dt*self.solver.velocity
+        self.solver.position = r0 + self.dt*self.solver.velocity
 
         if self.solver.rotating:
             T = self.solve_torques()
