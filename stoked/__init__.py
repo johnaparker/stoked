@@ -3,6 +3,10 @@ StokeD
 =======
 Simulation and visualization of Stokesian motion
 """
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import quaternion
 
 from . import analysis
 

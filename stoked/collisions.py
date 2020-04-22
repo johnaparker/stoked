@@ -12,8 +12,8 @@ def collisions_sphere(radius, kn):
 
         T1 = np.add.outer(radius, radius)
 
-        overlap = np.abs(r - T1)
-        overlap[overlap>T1] = 0
+        overlap = T1 - r
+        overlap[overlap<0] = 0
         return kn*overlap**1.5
 
     return pairwise_central_force(F)
