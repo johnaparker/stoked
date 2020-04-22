@@ -32,10 +32,10 @@ class basic_integrator(integrator):
 
     def ld_step(self):
         if self.solver.rotating:
-            raise NotImplemented('ld step with rotation')
+            raise NotImplementedError('ld step with rotation')
 
         if not self.isotropic:
-            raise NotImplemented('ld step with anisotropic particles')
+            raise NotImplementedError('ld step with anisotropic particles')
 
         F = self.solve_forces()
         Fr = self.random_force()
@@ -52,7 +52,7 @@ class basic_integrator(integrator):
 
     def hbd_step(self):
         if not self.isotropic:
-            raise NotImplemented('hbd step with anisotropic particles')
+            raise NotImplementedError('hbd step with anisotropic particles')
 
         F = self.solve_forces()
         T = self.solve_torques()
