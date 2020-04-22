@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from scipy.constants import k as kb
 from stoked.hydrodynamics import particle_wall_self_mobility, grand_mobility_matrix
+import quaternion
 
 def fluctuation(friction, temperature, dt):
     """Given a friction matrix, return the fluctuation matrix"""
@@ -11,10 +12,18 @@ def fluctuation(friction, temperature, dt):
         rhs = 2*kb*temperature*friction/dt
         return np.linalg.cholesky(rhs)
 
-def random_force(alpha, temperature, dt):
+def random_force_isotropic(alpha, temperature, dt):
     noise = np.random.normal(size=alpha.shape) 
     beta = np.sqrt(2*kb*temperature/(alpha*dt))
     return beta*noise
+
+def random_force_anisotropic(alpha, temperature, dt):
+    noise = np.random.normal(size=alpha.shape[:2]) 
+    beta = np.zeros_like(alpha)
+    for i in range(len(alpha)):
+        beta[i] = np.linalg.inv(alpha[i]) @ fluctuation(alpha[i], temperature, dt)
+
+    return np.einsum('Nij,Nj->Ni', beta, noise)
 
 class integrator:
     __metaclass__ = ABCMeta
@@ -27,14 +36,23 @@ class integrator:
         self.solver = solver
         self.dt = solver.dt
         self.hydrodynamics = solver.hydrodynamic_coupling
+        self.isotropic = solver.drag.isotropic
 
     def solve_forces(self):
         F = self.solver._total_force(self.solver.time, self.solver.position, self.solver.orientation)
         return F
 
     def random_force(self):
-        F = random_force(self.alpha_T, self.solver.temperature, self.dt)
-        return F
+        if self.isotropic:
+            return random_force_isotropic(self.alpha_T, self.solver.temperature, self.dt)
+        else:
+            return random_force_anisotropic(self.alpha_T_rot, self.solver.temperature, self.dt)
+
+    def random_torque(self):
+        if self.isotropic:
+            return random_force_isotropic(self.alpha_R, self.solver.temperature, self.dt)
+        else:
+            return random_force_anisotropic(self.alpha_R_rot, self.solver.temperature, self.dt)
 
     def solve_torques(self):
         T = self.solver._total_torque(self.solver.time, self.solver.position, self.solver.orientation)
@@ -46,9 +64,13 @@ class integrator:
 
     def pre_step(self):
         self.solver._update_interactions(self.solver.time, self.solver.position, self.solver.orientation)
+
         self._solve_mobility()
         if self.hydrodynamics and self.total_steps % self.grand_mobility_interval == 0:
             self._solve_grand_mobility()
+
+        if not self.isotropic:
+            self.solve_rotation_matrix()
 
     def post_step(self):
         if self.solver.rotating:
@@ -57,6 +79,11 @@ class integrator:
         self.solver.time += self.dt
         self.perform_constraints()
         self.total_steps += 1
+
+    def solve_rotation_matrix(self):
+        self.rot = quaternion.as_rotation_matrix(self.solver.orientation)
+        self.alpha_T_rot = np.einsum('Nij,Nj,Nlj->Nil', self.rot, self.alpha_T, self.rot)
+        self.alpha_R_rot = np.einsum('Nij,Nj,Nlj->Nil', self.rot, self.alpha_R, self.rot)
 
     def _solve_mobility(self):
         if self.solver.interface is not None:

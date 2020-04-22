@@ -7,30 +7,36 @@ class basic_integrator(integrator):
 
     def bd_step(self):
         F = self.solve_forces()
-        Fr = self.random_force()
-        F += Fr
+        F += self.random_force()
 
-        v1 = self.alpha_T*F
+        if self.isotropic:
+            v1 = self.alpha_T*F
+        else:
+            v1 = np.einsum('Nij,Nj->Ni', self.alpha_T_rot, F)
+
         self.solver.velocity = v1
         self.solver.position += self.dt*v1
 
         if self.solver.rotating:
             T = self.solve_torques()
-            w1 = self.alpha_R*T
+            T += self.random_torque()
+
+            if self.isotropic:
+                w1 = self.alpha_R*T
+            else:
+                w1 = np.einsum('Nij,Nj->Ni', self.alpha_R_rot, T)
+
             self.solver.angular_velocity = w1
             w1_q = np.array([np.quaternion(*omega) for omega in w1])
             self.solver.orientation = (1 + w1_q*self.dt/2)*self.solver.orientation
 
-            # rot = quaternion.as_rotation_matrix(orientation)
-            # alpha = np.einsum('Nij,Nj,Nlj->Nil', rot, alpha, rot)
-
-            # beta = np.zeros_like(alpha)
-            # for i in range(self.Nparticles):
-                # beta[i] = fluctuation(alpha[i], self.temperature, self.dt)
-
-            # velocity = np.einsum('Nij,Nj->Ni', alpha, drive) + np.einsum('Nij,Nj->Ni', beta, noise)
-
     def ld_step(self):
+        if self.solver.rotating:
+            raise NotImplemented('ld step with rotation')
+
+        if not self.isotropic:
+            raise NotImplemented('ld step with anisotropic particles')
+
         F = self.solve_forces()
         Fr = self.random_force()
         F += Fr
@@ -44,10 +50,10 @@ class basic_integrator(integrator):
         self.solver.velocity = v1
         self.solver.position += dr
 
-        if self.solver.rotating:
-            raise NotImplemented('ld step with rotation')
-
     def hbd_step(self):
+        if not self.isotropic:
+            raise NotImplemented('hbd step with anisotropic particles')
+
         F = self.solve_forces()
         T = self.solve_torques()
 

@@ -15,6 +15,10 @@ class trajectory:
         else:
             self.orientation = None
 
+    def __getitem__(self, key):
+        orientation_s = None if self.orientation is None else self.orientation[key]
+        return trajectory(self.position[key], orientation_s)
+
 class interactions:
     """
     Abstract base class for particle interactions
@@ -89,6 +93,9 @@ class stokesian_dynamics:
 
         if self.interface is not None and self.ndim != 3:
             raise ValueError('An interface can only be used in 3-dimensions')
+
+        if not self.drag.isotropic and self.interface is not None:
+            raise NotImplementedError('anisotropic particles with an interface')
 
         if orientation is not None:
             self.orientation = np.atleast_1d(np.asarray(orientation, dtype=np.quaternion))

@@ -63,7 +63,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
             time_unit                  string label for the units of time (default 'T')
             number_labels              include text labels (1,2,...) per particle
             trail                      length of particle trail
-            trail_type                 'normal' or 'fading'
+            trail_type                 'solid' or 'fading'
             time_kwargs                additional arguments to pass to timer text object
             label_kwargs               additional arguments to pass to label text objects
             circle_kwargs              additional arguments to circle properites
@@ -71,7 +71,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
             fading_kwargs              Fading line properites, {max_lw, min_lw}
             kwargs                     Additional kwargs for FuncAnimation
     """
-    trail_types = ['normal', 'fading']
+    trail_types = ['solid', 'fading']
     if trail_type not in trail_types:
         raise ValueError("trail_type '{}' is not valid. Choose from {}".format(trail_type, trail_types))
     if (trail_type == 'fading' and trail == np.inf):
@@ -145,14 +145,14 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
 
             if patches_type[i] is plt.Circle and angles is not None:
                 radius = patches_args[i][0]
-                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=False, **line_properties))
+                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color='k', animated=False, **line_properties))
                 ax.add_line(lines[-1])
         else:
             dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=False, transform=None))
             ax.add_patch(dots[-1])
 
         if trail > 0:
-            if trail_type == 'normal':
+            if trail_type == 'solid':
                 trails.append(ax.plot([pos[0]], [pos[1]], color=color, **trail_properties)[0])
             elif trail_type == 'fading':
                 c = np.zeros((trail,4))
