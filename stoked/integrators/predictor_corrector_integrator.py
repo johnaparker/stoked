@@ -2,8 +2,8 @@ from . import integrator
 import numpy as np
 
 class predictor_corrector_integrator(integrator):
-    def __init__(self):
-        pass
+    def __init__(self, grand_mobility_interval=10):
+        super().__init__(grand_mobility_interval)
 
     def bd_step(self):
         r0 = np.copy(self.solver.position)

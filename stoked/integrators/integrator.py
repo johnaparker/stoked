@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from scipy.constants import k as kb
+from stoked.hydrodynamics import particle_wall_self_mobility, grand_mobility_matrix
 
 def fluctuation(friction, temperature, dt):
     """Given a friction matrix, return the fluctuation matrix"""
-    if T == 0:
+    if temperature == 0:
         return np.zeros_like(friction)
     else:
         rhs = 2*kb*temperature*friction/dt
@@ -18,12 +19,14 @@ def random_force(alpha, temperature, dt):
 class integrator:
     __metaclass__ = ABCMeta
 
-    def __init__(self):
-        pass
+    def __init__(self, grand_mobility_interval=10):
+        self.grand_mobility_interval = grand_mobility_interval
+        self.total_steps = 0
 
     def initialize(self, solver):
         self.solver = solver
         self.dt = solver.dt
+        self.hydrodynamics = solver.hydrodynamic_coupling
 
     def solve_forces(self):
         F = self.solver._total_force(self.solver.time, self.solver.position, self.solver.orientation)
@@ -34,8 +37,7 @@ class integrator:
         return F
 
     def solve_torques(self):
-        T = self._total_torque(self.solver.time, self.solver.position, self.solver.orientation)
-        T += random_force(self.alpha_R, self.solver.temperature, self.dt)
+        T = self.solver._total_torque(self.solver.time, self.solver.position, self.solver.orientation)
         return T
 
     def perform_constraints(self):
@@ -45,6 +47,8 @@ class integrator:
     def pre_step(self):
         self.solver._update_interactions(self.solver.time, self.solver.position, self.solver.orientation)
         self._solve_mobility()
+        if self.hydrodynamics and self.total_steps % self.grand_mobility_interval == 0:
+            self._solve_grand_mobility()
 
     def post_step(self):
         if self.solver.rotating:
@@ -52,6 +56,7 @@ class integrator:
 
         self.solver.time += self.dt
         self.perform_constraints()
+        self.total_steps += 1
 
     def _solve_mobility(self):
         if self.solver.interface is not None:
@@ -66,10 +71,35 @@ class integrator:
         else:
             self.alpha_T, self.alpha_R = self.solver.alpha_T, self.solver.alpha_R
 
+    def _solve_grand_mobility(self):
+        drag_T = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
+        drag_R = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
+        np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
+        np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+
+        self.grand_M = grand_mobility_matrix(self.solver.position, drag_T, drag_R, self.solver.drag.viscosity)
+        self.grand_N = fluctuation(self.grand_M, self.solver.temperature, self.dt)
+
+        # if self.drag.isotropic:
+            # np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
+            # np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+        # else:
+            # rot = quaternion.as_rotation_matrix(orientation)
+            # drag_T[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_T, rot)
+            # drag_R[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_R, rot)
+
     @abstractmethod
     def bd_step(self):
-        raise NotImplementedError('bd_step not implemented for this integrator')
+        raise NotImplementedError('brownian dynamics step not implemented for this integrator')
 
     @abstractmethod
     def ld_step(self):
-        raise NotImplementedError('ld_step not implemented for this integrator')
+        raise NotImplementedError('langevin dynamics step not implemented for this integrator')
+
+    @abstractmethod
+    def hbd_step(self):
+        raise NotImplementedError('hydrodynamic-brownian dynamics step not implemented for this integrator')
+
+    @abstractmethod
+    def hld_step(self):
+        raise NotImplementedError('hydrodynamic-langevin dynamics step not implemented for this integrator')

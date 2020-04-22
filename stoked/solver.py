@@ -267,10 +267,16 @@ class stokesian_dynamics:
     def _init_integrator(self):
         self.integrator.initialize(self)
 
-        if self.inertia is None:
-            self.step_func = self.integrator.bd_step
+        if self.hydrodynamic_coupling:
+            if self.inertia is None:
+                self.step_func = self.integrator.hbd_step
+            else:
+                self.step_func = self.integrator.hld_step
         else:
-            self.step_func = self.integrator.ld_step
+            if self.inertia is None:
+                self.step_func = self.integrator.bd_step
+            else:
+                self.step_func = self.integrator.ld_step
 
 def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
                  force=None, torque=None, interactions=None, constraint=None, interface=None, inertia=None, integrator=None):
