@@ -42,6 +42,9 @@ class van_der_waals_sphere_interface(interactions):
 
         F = np.zeros_like(self.position)
         F[:,2] = -np.sign(dz)*factor*Q
+        idx = (dz - radius < 3e-9)
+        F[idx] = 0
+
         return F
 
     def torque(self):

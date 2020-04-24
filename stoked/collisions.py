@@ -43,8 +43,9 @@ class collisions_sphere_interface(interactions):
         F = np.zeros_like(self.position)
 
         dz = self.position[:,2] - self.zpos
-        idx = np.abs(dz) < rad
-        F[idx,2] = np.sign(dz[idx])*self.kn*np.sqrt((dz[idx] - rad[idx])**3)
+        overlap = dz - rad
+        idx = overlap < 0
+        F[idx,2] = np.sign(dz[idx])*self.kn*np.sqrt(-overlap[idx])**3
 
         return F
 
