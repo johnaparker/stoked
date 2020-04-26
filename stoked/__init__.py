@@ -16,7 +16,7 @@ from .inertia import inertia, inertia_sphere, inertia_ellipsoid
 from .collisions import collisions_sphere, collisions_sphere_interface
 from .electrostatics import (electrostatics, double_layer_sphere,
                              double_layer_sphere_interface)
-from .electrodynamics import point_dipole_electrodynamics
+from .electrodynamics import point_dipole_electrodynamics, polarizability_sphere
 from .van_der_waals import van_der_waals_sphere, van_der_waals_sphere_interface
 from .gravity import gravity, gravity_sphere, gravity_ellipsoid
 from .hydrodynamics import grand_mobility_matrix, interface

@@ -25,11 +25,35 @@ def greens_any_dim(R, k, eps_b=1, delta=0):
     return np.einsum('...,...ij->...ij', A, B + C)
     #return np.einsum(A, [Ellipsis], B+C, [Ellipsis, 0, 1])
 
+def polarizability_sphere(radius, eps, wavelength, eps_b=1, dynamic_correction=True):
+    """
+    Polarizability of a sphere. Returns (static alpha, dynamic alpha)
+
+    Arguments:
+        radius         sphere radius
+        eps            material permitivitty
+        wavelength     wavelength of light
+        eps_b          background permitivitty
+        dynamic_correction    whether to dynamically correct the static polarizability
+    """
+    radius = np.atleast_1d(radius)
+    alpha_0 = 4*np.pi*eps_b*constants.epsilon_0*radius**3 * (eps - eps_b)/(eps + 2*eps_b)
+    k = 2*np.pi*eps_b**0.5/wavelength
+
+    correction = 1
+    if dynamic_correction:
+        correction -= 1j*k**3*alpha_0/(6*np.pi*eps_b*constants.epsilon_0)
+        correction -= k**2*alpha_0/(6*np.pi*eps_b*constants.epsilon_0*radius)
+
+    alpha = alpha_0/correction
+
+    return alpha_0, alpha
+
 class point_dipole_electrodynamics(interactions):
     """Perform point dipole electrodynamic interactions"""
-    def __init__(self, alpha_0, source, wavelength, eps_b=1, interactions=True, use_dynamic_polarizability=True):
+    def __init__(self, alpha, source, wavelength, eps_b=1, interactions=True):
         """Arguments:
-                alpha_0[N,3]    static polarizability vectors of N particles (alternative shape: [3], CONST)
+                alpha           (static, dynamic) polarizability of the particles
                 source          incident source object that defines E and H functions
                 wavelength      wavelength of illumination (in meters)
                 eps_b           background permitivitty (default: 1)
@@ -37,9 +61,16 @@ class point_dipole_electrodynamics(interactions):
                 use_dynamic_polarizability       modify the input alpha to be frequency corrected
         """
 
-        self.Nparticles = len(alpha_0)
+        self.Nparticles = len(alpha[0])
+
         self.alpha_0 = np.zeros([self.Nparticles,3,3], dtype=complex)
-        np.einsum('Nii->Ni', self.alpha_0)[...] = alpha_0
+        self.alpha = np.zeros([self.Nparticles,3,3], dtype=complex)
+
+        np.einsum('Nii->Ni', self.alpha_0)[...] = alpha[0]
+        np.einsum('Nii->Ni', self.alpha)[...] = alpha[1]
+
+        self.alpha_0_t = np.copy(self.alpha_0)
+        self.alpha_t = np.copy(self.alpha)
 
         self.source = source
         self.wavelength = wavelength
@@ -49,17 +80,6 @@ class point_dipole_electrodynamics(interactions):
 
         self.sol = None
         self.G = np.zeros(shape = (self.Nparticles, 3, self.Nparticles, 3), dtype=complex)
-
-        if use_dynamic_polarizability:
-            # self.alpha = self.alpha_0/(1 - 2/3*1j*self.k**3*self.alpha_0)
-            self.alpha = self.alpha_0/(1 - 1j*self.k**3*self.alpha_0/(6*np.pi*eps_b*constants.epsilon_0))
-            self.alpha = self.alpha_0/(1 - 1j*self.k**3*self.alpha_0/(6*np.pi*eps_b*constants.epsilon_0)
-                    - self.k**2*self.alpha_0/(6*np.pi*eps_b*constants.epsilon_0*(75e-9)))
-        else:
-            self.alpha = self.alpha_0
-
-        self.alpha_0_t = np.copy(self.alpha_0)
-        self.alpha_t = np.copy(self.alpha)
 
     def solve(self):
         """Solve for the electric fields given the current state of particles"""
