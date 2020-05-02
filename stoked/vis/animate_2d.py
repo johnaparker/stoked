@@ -9,33 +9,14 @@ import matplotlib.patheffects as path_effects
 from tqdm import tqdm
 import matplotlib.colors as mcolors
 from collections.abc import Iterable
-from collections import namedtuple
 import stoked
+from stoked.vis._internal import atleast, patches
 
-patches = namedtuple('patches', ['patches_type', 'args'])
 def circle_patches(radius):
     return patches(plt.Circle, (radius,))
 
 def ellipse_patches(rx, ry):
     return patches(mpl.patches.Ellipse, (2*rx, 2*ry))
-
-def atleast(array, dim, length, dtype=None):
-    """Given an n-dimensional array, return either an n or n+1 dimensional repeated array
-        array      input array (or scalar)
-        dim        dimension of the returned array (must be n or n+1)
-        dtype      array datatype (default None)
-    """
-
-    ret = np.asarray(np.atleast_1d(array), dtype=dtype)
-    if (dim not in (ret.ndim,ret.ndim+1)):
-        raise ValueError('dim = {0} is invalid with input dim = {1}'.format(dim, ret.ndim))
-
-    if len(ret.shape) == dim and ret.shape[0] != length:
-        ret = np.repeat(ret, length)
-    elif len(ret.shape) != dim:
-        ret = np.array([ret]*length)
-
-    return ret
 
 def rotation_transform(axis, angle, ax = None):
     """Return a rotation transfrom that rotates around an axis by an angle
