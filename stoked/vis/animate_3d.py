@@ -6,6 +6,7 @@ import stoked
 from collections.abc import Iterable
 import matplotlib.colors as mcolors
 from stoked.vis._internal import patches
+from multiprocessing import Process
 
 def sphere_patches(radius):
     import vpython
@@ -16,6 +17,22 @@ def ellipsoid_patches(rx, ry, rz):
     return patches(vpython.ellipsoid, dict(length=2*rx, height=2*ry, width=2*rz))
 
 def trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, colors=None, opacity=1, trail=None, axes=False, axes_length=1, grid=False):
+    p = Process(target=_trajectory_animation_3d, kwargs=dict(
+           trajectory=trajectory,
+           patches=patches,
+           wait=wait,
+           repeat=repeat,
+           colors=colors,
+           opacity=opacity,
+           trail=trail,
+           axes=axes,
+           axes_length=axes_length,
+           grid=grid
+        ))
+
+    p.start()
+
+def _trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, colors=None, opacity=1, trail=None, axes=False, axes_length=1, grid=False):
     """Create a 3D trajectory animation with VPython
         
         Arguments:
