@@ -27,4 +27,4 @@ from .common import lennard_jones
 from .analysis import msd
 from .utility import quaternion_to_angles
 from .vis import (trajectory_animation, trajectory_animation_3d,
-                  circle_patches, ellipse_patches, sphere_patches)
+                  circle_patches, ellipse_patches, sphere_patches, ellipsoid_patches)

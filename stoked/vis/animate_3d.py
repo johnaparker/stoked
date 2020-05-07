@@ -11,6 +11,10 @@ def sphere_patches(radius):
     import vpython
     return patches(vpython.sphere, dict(radius=radius))
 
+def ellipsoid_patches(rx, ry, rz):
+    import vpython
+    return patches(vpython.ellipsoid, dict(length=2*rx, height=2*ry, width=2*rz))
+
 def trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, colors=None, opacity=1, trail=None, axes=False, axes_length=1, grid=False):
     """Create a 3D trajectory animation with VPython
         
