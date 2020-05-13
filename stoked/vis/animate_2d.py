@@ -13,10 +13,15 @@ import stoked
 from stoked.vis._internal import atleast, patches
 
 def circle_patches(radius):
-    return patches(plt.Circle, (radius,))
+    return patches(plt.Circle, (radius,), size=np.max(radius))
 
 def ellipse_patches(rx, ry):
-    return patches(mpl.patches.Ellipse, (2*rx, 2*ry))
+    return patches(mpl.patches.Ellipse, (2*rx, 2*ry), size=max(np.max(rx), np.max(ry)))
+
+def collection_patch(mpatches, size=0):
+    collection = mpl.collections.PatchCollection(mpatches)
+    collection.center = (0,0)
+    return patches(collection, (), size)
 
 def rotation_transform(axis, angle, ax = None):
     """Return a rotation transfrom that rotates around an axis by an angle
@@ -100,20 +105,24 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
 
     particles = []
     dots = []
-    lines = []
+    lines = {}
     trails = []
     text = {}
 
     if patches is not None:
-        if not isinstance(patches.patches_type, Iterable):
-            patches_type = [patches.patches_type]*Nparticles
+        if isinstance(patches, list): 
+            patches_type = [p.patches_type for p in patches]
+            patches_args = [p.args for p in patches]
         else:
-            patches_type = patches.patches_type
+            if not isinstance(patches.patches_type, Iterable):
+                patches_type = [patches.patches_type]*Nparticles
+            else:
+                patches_type = patches.patches_type
 
-        if not isinstance(patches.args[0], Iterable):
-            patches_args = [patches.args for i in range(Nparticles)]
-        else:
-            patches_args = [[arg[i] for arg in patches.args] for i in range(Nparticles)]
+            if not isinstance(patches.args[0], Iterable):
+                patches_args = [patches.args for i in range(Nparticles)]
+            else:
+                patches_args = [[arg[i] for arg in patches.args] for i in range(Nparticles)]
 
     inv = ax.transData.transform
     for i in range(Nparticles): 
@@ -121,13 +130,18 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         color = next(color_cycle)
 
         if patches is not None:
-            particles.append(patches_type[i](pos, *patches_args[i], fc=color, edgecolor='k', animated=False, **circle_properties))
-            ax.add_patch(particles[-1])
+            if isinstance(patches_type[i], mpl.collections.PatchCollection):
+                particles.append(patches_type[i])
+                ax.add_collection(particles[-1])
+                particles[-1].set(facecolor=color, edgecolor='k', animated=False)
+            else:
+                particles.append(patches_type[i](pos, *patches_args[i], fc=color, edgecolor='k', animated=False, **circle_properties))
+                ax.add_patch(particles[-1])
 
             if patches_type[i] is plt.Circle and angles is not None:
                 radius = patches_args[i][0]
-                lines.append(plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color='k', animated=False, **line_properties))
-                ax.add_line(lines[-1])
+                lines[i] = (plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color='k', animated=False, **line_properties))
+                ax.add_line(lines[i])
         else:
             dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=False, transform=None))
             ax.add_patch(dots[-1])
@@ -171,10 +185,17 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         for i in range(Nparticles): 
             pos = positions[i]
             if particles:
-                particles[i].center = pos
+                transform = ax.transData
                 if angles is not None:
-                    tran = mpl.transforms.Affine2D().rotate_around(*pos[:2], angles[i])
-                    particles[i].set_transform(tran + ax.transData)
+                    transform = mpl.transforms.Affine2D().rotate_around(*pos[:2], angles[i]) + transform
+                if isinstance(patches_type[i], mpl.collections.PatchCollection):
+                    particles[i].center = pos
+                    transform = mpl.transforms.Affine2D().translate(*pos[:2]) + transform
+                else:
+                    particles[i].center = pos
+
+
+                particles[i].set_transform(transform)
 
                 if angles is not None and patches_type[i] is plt.Circle:
                     radius = patches_args[i][0]
@@ -194,7 +215,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
                 text[str(i+1)].set_position(pos)
                 
         
-        return  trails + particles + lines + list(text.values()) + dots
+        return  trails + particles + list(lines.values()) + list(text.values()) + dots
 
     def init():
         positions, angles = func(0)
@@ -202,7 +223,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
         angles = np.asarray(angles, dtype=float)
 
         history[...] = np.tile(positions, (trail,1,1))
-        return  trails + particles + lines + list(text.values()) + dots
+        return  trails + particles + list(lines.values()) + list(text.values()) + dots
 
     kw = dict(interval=30, repeat=True, blit=True)
     kw.update(kwargs)
@@ -233,12 +254,15 @@ def trajectory_animation(trajectory, patches=None, *args, **kwargs):
     ylim = np.array([np.min(trajectory.position[...,1]),
                      np.max(trajectory.position[...,1])])
     if patches:
-        xbuff = np.max(patches.args)
-        ybuff = np.max(patches.args)
-        xlim[0] -= xbuff
-        xlim[1] += xbuff
-        ylim[0] -= ybuff
-        ylim[1] += ybuff
+        if isinstance(patches, list):
+            buff = np.max([p.size for p in patches])
+        else:
+            buff = patches.size
+
+        xlim[0] -= buff
+        xlim[1] += buff
+        ylim[0] -= buff
+        ylim[1] += buff
         
 
 

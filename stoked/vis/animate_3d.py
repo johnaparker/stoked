@@ -14,7 +14,7 @@ def sphere_patches(radius):
 
 def ellipsoid_patches(rx, ry, rz):
     import vpython
-    return patches(vpython.ellipsoid, dict(length=2*rx, height=2*ry, width=2*rz))
+    return patches(vpython.ellipsoid, dict(length=2*rz, height=2*ry, width=2*rx, axis=vpython.vec(0,0,1)))
 
 def trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, colors=None, opacity=1, trail=None, axes=False, axes_length=1, grid=False):
     p = Process(target=_trajectory_animation_3d, kwargs=dict(
@@ -115,13 +115,15 @@ def _trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, color
     for i,obj in enumerate(objs):
         rot = quaternion.as_rotation_matrix(orientations[0,i])
         a = obj.axis
+        print(a)
+        print(rot[:,2])
         b = vec(*rot[:,2])
         a /= vpython.mag(a)
         b /= vpython.mag(b)
         axis = vpython.cross(a,b)
         angle = vpython.acos(vpython.dot(a,b))
-        obj.rotate(angle=angle, axis=axis, origin=obj.pos + obj.axis/2)
-        obj.pos -= obj.axis/2
+        obj.rotate(angle=angle, axis=axis, origin=obj.pos)
+        # obj.pos -= obj.axis/2
         if axes:
             for j,arrow in enumerate(arrows[i]):
                 arrow.pos = vec(*coordinates[0,i])
@@ -132,13 +134,12 @@ def _trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, color
         vpython.arrow(pos=vpython.vector(0,0,0), axis=vpython.vector(0,300,0), shaftwidth=2, color=vpython.color.black)
         vpython.arrow(pos=vpython.vector(0,0,0), axis=vpython.vector(0,0,300), shaftwidth=2, color=vpython.color.black)
 
+    trange = range(coordinates.shape[0])
     if repeat:
-        trange = cycle(range(1,coordinates.shape[0]))
-    else:
-        trange = range(1,coordinates.shape[0])
+        trange = cycle(trange)
 
     for t in trange:
-        if t == 1:
+        if t == 0:
             if wait:
                 scene.waitfor('click')
             for trail in trails:
@@ -152,7 +153,7 @@ def _trajectory_animation_3d(trajectory, patches, wait=False, repeat=True, color
             b /= vpython.mag(b)
             axis = vpython.cross(a,b)
             angle = vpython.acos(vpython.dot(a,b))
-            obj.rotate(angle=angle, axis=axis, origin=obj.pos + obj.axis/2)
+            obj.rotate(angle=angle, axis=axis, origin=obj.pos)
             
             if patches_type[i] in (vpython.cylinder, vpython.arrow, vpython.cone, vpython.pyramid):
                 obj.pos = vec(*coordinates[t,i]) - obj.axis/2

@@ -1,7 +1,7 @@
 import numpy as np
 from collections import namedtuple
 
-patches = namedtuple('patches', ['patches_type', 'args'])
+patches = namedtuple('patches', ['patches_type', 'args', 'size'])
 
 def atleast(array, dim, length, dtype=None):
     """Given an n-dimensional array, return either an n or n+1 dimensional repeated array
