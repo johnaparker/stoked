@@ -78,7 +78,7 @@ class stokesian_dynamics:
         """
         self.temperature = temperature
         self.dt = dt
-        self.time = 0
+        self.time = 0.0
         self.position = np.atleast_2d(np.asarray(position, dtype=float))
         self.drag = drag
         self.Nparticles = len(self.position)
