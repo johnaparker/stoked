@@ -51,9 +51,6 @@ class basic_integrator(integrator):
         self.solver.position += dr
 
     def hbd_step(self):
-        if not self.isotropic:
-            raise NotImplementedError('hbd step with anisotropic particles')
-
         F = self.solve_forces()
         T = self.solve_torques()
 

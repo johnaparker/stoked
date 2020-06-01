@@ -101,19 +101,17 @@ class integrator:
     def _solve_grand_mobility(self):
         drag_T = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
         drag_R = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
-        np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
-        np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+
+        if self.solver.drag.isotropic:
+            np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
+            np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+        else:
+            rot = quaternion.as_rotation_matrix(self.solver.orientation)
+            drag_T[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_T, rot)
+            drag_R[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_R, rot)
 
         self.grand_M = grand_mobility_matrix(self.solver.position, drag_T, drag_R, self.solver.drag.viscosity)
         self.grand_N = fluctuation(self.grand_M, self.solver.temperature, self.dt)
-
-        # if self.drag.isotropic:
-            # np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
-            # np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
-        # else:
-            # rot = quaternion.as_rotation_matrix(orientation)
-            # drag_T[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_T, rot)
-            # drag_R[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_R, rot)
 
     @abstractmethod
     def bd_step(self):
