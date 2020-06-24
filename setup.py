@@ -11,7 +11,7 @@ EMAIL = 'japarker@uchicago.edu'
 AUTHOR = 'John Parker'
 KEYWORDS = 'stokesian dynamics brownian'
 # REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.3.2'
+VERSION = '0.3.3'
 LICENSE = 'MIT'
 
 REQUIRED = [
