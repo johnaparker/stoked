@@ -162,14 +162,16 @@ class stokesian_dynamics:
             self.moment[...] = self.inertia.moment
 
         self._init_integrator()
+        self._num_thermal_steps = 1
 
     def step(self):
         """
         Time-step the positions (and orientations) by dt
         """
         self.integrator.pre_step()
-        self.step_func()
-        self.integrator.post_step()
+        for n in range(self._num_thermal_steps):
+            self.step_func()
+            self.integrator.post_step()
 
     def run(self, Nsteps, progress=True):
         """
