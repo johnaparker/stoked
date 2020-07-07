@@ -41,7 +41,7 @@ class basic_integrator(integrator):
         Fr = self.random_force()
         F += Fr
 
-        mass = self.solver.mass
+        mass = self.solver.mass[:,np.newaxis]
         v0 = self.solver.velocity
         v1 = self.alpha_T*F + (v0 - self.alpha_T*F)*np.exp(-self.dt/mass/self.alpha_T)
 
