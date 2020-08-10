@@ -79,7 +79,7 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
     trail_properties = dict(zorder=0)
     trail_properties.update(trail_kwargs)
 
-    circle_properties = dict(linewidth=1, zorder=1)
+    circle_properties = dict(linewidth=3, zorder=1)
     circle_properties.update(circle_kwargs)
 
     line_properties = deepcopy(circle_properties)
@@ -133,17 +133,17 @@ def animation_2d(func, patches, frames=None, colors=None, ax=None, time=None, ti
             if isinstance(patches_type[i], mpl.collections.PatchCollection):
                 particles.append(patches_type[i])
                 ax.add_collection(particles[-1])
-                particles[-1].set(facecolor=color, edgecolor='k', animated=False)
+                particles[-1].set(facecolor=color, edgecolor='k', animated=True)
             else:
-                particles.append(patches_type[i](pos, *patches_args[i], fc=color, edgecolor='k', animated=False, **circle_properties))
+                particles.append(patches_type[i](pos, *patches_args[i], fill=False, fc=color, edgecolor=color, animated=True, **circle_properties))
                 ax.add_patch(particles[-1])
 
             if patches_type[i] is plt.Circle and angles is not None:
                 radius = patches_args[i][0]
-                lines[i] = (plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color='k', animated=False, **line_properties))
+                lines[i] = (plt.Line2D([pos[0]-radius, pos[0]+radius], [pos[1], pos[1]], lw=circle_properties['linewidth'], color=color, animated=True, **line_properties))
                 ax.add_line(lines[i])
         else:
-            dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=False, transform=None))
+            dots.append(plt.Circle(inv(pos[:2]), 3, color=color, animated=True, transform=None))
             ax.add_patch(dots[-1])
 
         if trail > 0:
