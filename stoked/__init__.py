@@ -28,4 +28,5 @@ from .analysis import msd
 from .utility import quaternion_to_angles
 from .vis import (trajectory_animation, trajectory_animation_3d,
                   circle_patches, ellipse_patches, collection_patch,
-                  sphere_patches, ellipsoid_patches)
+                  sphere_patches, ellipsoid_patches,
+                  trajectory_snapshots)
