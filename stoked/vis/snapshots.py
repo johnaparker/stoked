@@ -5,6 +5,7 @@ import matplotlib as mpl
 from collections.abc import Iterable
 from itertools import cycle
 from copy import deepcopy
+import matplotlib.colors as mcolors
 
 def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwargs={}, dt=None, time_unit='s'):
     """
