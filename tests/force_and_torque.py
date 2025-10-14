@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 from tqdm import tqdm
 
-from stoked import brownian_dynamics, ellipsoid_drag, trajectory_animation
+from stoked import brownian_dynamics, circle_patches, drag_ellipsoid, trajectory_animation
 
 position = [0, 0, 0]
-drag = ellipsoid_drag([1, 1.5, 1], 1)
+drag = drag_ellipsoid([1, 1.5, 1], 1)
 temperature = 0.00001
 dt = 10
 
@@ -34,15 +34,14 @@ for i in tqdm(range(Nsteps)):
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 ax.plot(history[:, 0], history[:, 1], lw=0.5)
-ax.legend()
 
 fig, ax = plt.subplots()
 time = np.arange(Nsteps) * dt
-ax.plot(time, cumtrapz(omega_z, time, initial=0))
+ax.plot(time, cumulative_trapezoid(omega_z, time, initial=0))
 
 fig, ax = plt.subplots()
 anim = trajectory_animation(
-    history.reshape([Nsteps, 1, 3])[::2], radii=1e-11, projection="z", interval=30, trail=500, trail_type="fading"
+    history.reshape([Nsteps, 1, 3])[::2], patches=circle_patches(1e-11), interval=30, trail=500, trail_type="fading"
 )
 
 plt.show()

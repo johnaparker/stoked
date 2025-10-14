@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from stoked import brownian_dynamics, drag_sphere, trajectory_animation
+from stoked import brownian_dynamics, circle_patches, drag_sphere, trajectory_animation
 
 
 def bigaussian_force(t, rvec, orientation, rvec1, rvec2, A1=1, w1=1, A2=1, w2=1):
@@ -53,6 +53,6 @@ fig, ax = plt.subplots()
 ax.plot(history[:, 0])
 
 fig, ax = plt.subplots()
-anim = trajectory_animation(history.reshape([Nsteps, 1, 3]), radii=1e-11, projection="z", interval=30)
+anim = trajectory_animation(history.reshape([Nsteps, 1, 3]), patches=circle_patches(1e-11), interval=30)
 
 plt.show()

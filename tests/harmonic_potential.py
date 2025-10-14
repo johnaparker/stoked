@@ -5,7 +5,7 @@ import numpy as np
 from scipy.constants import k as kb
 from tqdm import tqdm
 
-from stoked import brownian_dynamics, drag_sphere, trajectory_animation
+from stoked import brownian_dynamics, circle_patches, drag_sphere, trajectory_animation
 
 no_force = None
 
@@ -38,7 +38,6 @@ for Fext in [no_force, harmonic_force]:
         sim.step()
 
     ax.plot(history[:, 0], history[:, 1], lw=0.5)
-    ax.legend()
 
     if Fext is harmonic_force:
         fig, ax = plt.subplots()
@@ -58,6 +57,6 @@ for Fext in [no_force, harmonic_force]:
 
 
 fig, ax = plt.subplots()
-anim = trajectory_animation(history.reshape([Nsteps, 1, 3]), radii=1e-11, projection="z", interval=30)
+anim = trajectory_animation(history.reshape([Nsteps, 1, 3]), patches=circle_patches(1e-11), interval=30)
 
 plt.show()
