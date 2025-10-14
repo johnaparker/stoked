@@ -32,3 +32,4 @@ pybind11/
 temp/
 *.h5
 play/
+.claude
