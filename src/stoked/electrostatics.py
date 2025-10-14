@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import constants
 
-from stoked import interactions
+from stoked.solver import interactions
 from stoked.forces import pairwise_central_force
 
 

@@ -4,7 +4,7 @@ import numpy as np
 import quaternion
 from scipy import constants
 
-from stoked import interactions
+from stoked.solver import interactions
 
 
 def greens(R, k, eps_b=1):

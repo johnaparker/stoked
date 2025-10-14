@@ -1,6 +1,6 @@
 import numpy as np
 
-from stoked import interactions
+from stoked.solver import interactions
 
 
 def van_der_waals_sphere(radius, hamaker):

@@ -2,7 +2,7 @@
 
 import numpy as np
 import quaternion
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 
 def quaternion_to_angles(quat, reference=None):
@@ -27,5 +27,5 @@ def quaternion_to_angles(quat, reference=None):
     idx = theta == 0
     phi[idx] *= 2
 
-    angle = phi + cumtrapz(d_angle, axis=0, initial=0)
+    angle = phi + cumulative_trapezoid(d_angle, axis=0, initial=0)
     return angle

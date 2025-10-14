@@ -1,6 +1,7 @@
 import numpy as np
+import quaternion
 
-from . import integrator
+from .integrator import integrator
 
 
 class predictor_corrector_integrator(integrator):
@@ -22,7 +23,7 @@ class predictor_corrector_integrator(integrator):
         if self.solver.rotating:
             T = self.solve_torques()
             w1 = self.alpha_R * T
-            w1_q = np.array([np.quaternion(*omega) for omega in w1])
+            w1_q = np.array([np.quaternion(0, *omega) for omega in w1])
 
             np.copy(self.solver.angular_velocity)
             o0 = np.copy(self.solver.orientation)
@@ -42,7 +43,7 @@ class predictor_corrector_integrator(integrator):
         if self.solver.rotating:
             T = self.solve_torques()
             w2 = self.alpha_R * T
-            w2_q = np.array([np.quaternion(*omega) for omega in w1])
+            w2_q = np.array([np.quaternion(0, *omega) for omega in w1])
             (w1_q + w2_q) / 2
 
             self.solver.angular_velocity = (w1 + w2) / 2

@@ -1,7 +1,7 @@
 """Functions for post-processing analysis of trajectory data."""
 
 import numpy as np
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 from tqdm import tqdm
 
 
@@ -107,7 +107,7 @@ def angle_of_cluster(trajectory, wrap=False, initial=0, N_cutoff=1):
 
     ### the angle of the cluster is then an integrated average of dphi
     dphi_avg = np.average(dphi, axis=1)  # average of trackers
-    phi_cluster = cumtrapz(dphi_avg, initial=initial)  # angle integral of differential angles
+    phi_cluster = cumulative_trapezoid(dphi_avg, initial=initial)  # angle integral of differential angles
     phi_cluster = np.insert(phi_cluster, 0, 0, axis=0)
 
     if not wrap:

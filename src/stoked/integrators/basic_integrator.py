@@ -1,6 +1,7 @@
 import numpy as np
+import quaternion
 
-from . import integrator
+from .integrator import integrator
 
 
 class basic_integrator(integrator):
@@ -29,7 +30,7 @@ class basic_integrator(integrator):
                 w1 = np.einsum("Nij,Nj->Ni", self.alpha_R_rot, T)
 
             self.solver.angular_velocity = w1
-            w1_q = np.array([np.quaternion(*omega) for omega in w1])
+            w1_q = np.array([np.quaternion(0, *omega) for omega in w1])
             self.solver.orientation = (1 + w1_q * self.dt / 2) * self.solver.orientation
 
     def ld_step(self):
@@ -73,5 +74,5 @@ class basic_integrator(integrator):
         self.solver.position += self.dt * v1
 
         self.solver.angular_velocity = w1
-        w1_q = np.array([np.quaternion(*omega) for omega in w1])
+        w1_q = np.array([np.quaternion(0, *omega) for omega in w1])
         self.solver.orientation = (1 + w1_q * self.dt / 2) * self.solver.orientation

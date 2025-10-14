@@ -1,6 +1,6 @@
 import numpy as np
 
-from stoked import interactions
+from stoked.solver import interactions
 
 
 class pairwise_force(interactions):
