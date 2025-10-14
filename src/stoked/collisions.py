@@ -1,7 +1,7 @@
 import numpy as np
 
-from stoked.solver import interactions
 from stoked.forces import pairwise_central_force
+from stoked.solver import interactions
 
 
 def collisions_sphere(radius, kn):

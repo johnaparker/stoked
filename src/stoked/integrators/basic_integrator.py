@@ -1,5 +1,4 @@
 import numpy as np
-import quaternion
 
 from .integrator import integrator
 

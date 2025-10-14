@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import constants
 
-from stoked.solver import interactions
 from stoked.forces import pairwise_central_force
+from stoked.solver import interactions
 
 
 def electrostatics(charges):
