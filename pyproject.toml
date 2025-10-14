@@ -15,9 +15,15 @@ dependencies = [
     "tqdm>=4.67.1",
 ]
 
+[project.scripts]
+stoked = "stoked.cli:main"
+
 [build-system]
 requires = ["uv_build>=0.9.0,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.uv]
+package = true
 
 [dependency-groups]
 dev = [
@@ -50,3 +56,4 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D103", "D100"]
 "examples/**" = ["D100", "D103", "ARG001"]
+"src/stoked/examples/**" = ["D100", "D103", "ARG001"]

@@ -19,7 +19,18 @@ pip install stoked
 Usage
 --------------
 
-For examples and use cases, see examples folder.
+See the [examples](src/stoked/examples) folder for how to use StokeD.
+
+Run any of the available [examples](src/stoked/examples) without explicit installation using `uv`:
+
+| Command | Description |
+|---------|-------------|
+| `uvx stoked free_particle` | Free Brownian diffusion in 3D |
+| `uvx stoked estatics` | Electrostatic interactions with harmonic confinement |
+| `uvx stoked ellipsoid` | Ellipsoidal particle with external force and torque |
+| `uvx stoked tt_coupling` | Hydrodynamic translation-translation coupling |
+| `uvx stoked rt_coupling` | Hydrodynamic rotation-translation coupling |
+| `uvx stoked bigaussian_potential` | Particle in double-well potential |
 
 For full documentation, see docs folder.
 
