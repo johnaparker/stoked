@@ -3,7 +3,7 @@ import miepy
 import numpy as np
 from miepy.constants import Z0
 from scipy import constants
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 import stoked
 
@@ -58,10 +58,10 @@ ax.legend()
 fig, ax = plt.subplots()
 
 kT = 300 * constants.k
-W1 = cumtrapz(-F1, z, initial=0) / kT
-W2 = cumtrapz(-F2, z, initial=0) / kT
-W3 = cumtrapz(-F3, z, initial=0) / kT
-W4 = cumtrapz(-F4, z, initial=0) / kT
+W1 = cumulative_trapezoid(-F1, z, initial=0) / kT
+W2 = cumulative_trapezoid(-F2, z, initial=0) / kT
+W3 = cumulative_trapezoid(-F3, z, initial=0) / kT
+W4 = cumulative_trapezoid(-F4, z, initial=0) / kT
 
 W1 -= W1[-1]
 W2 -= W2[-1]
