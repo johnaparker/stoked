@@ -225,7 +225,7 @@ def animation_2d(
 
     def _get_artist(obj):
         """Extract the Artist from an object, handling colored_line wrappers."""
-        if hasattr(obj, 'collection'):
+        if hasattr(obj, "collection"):
             return obj.collection
         return obj
 

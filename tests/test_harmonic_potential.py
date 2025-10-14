@@ -36,7 +36,6 @@ def test_free_diffusion():
     # For drag_sphere(1/(6*pi), 1): drag_T = 6*pi*eta*a = 6*pi*1*(1/(6*pi)) = 1
     D = kb * temperature / drag.drag_T
     time = np.arange(Nsteps) * dt
-    expected_msd = 6 * D * time
 
     # Check linear growth by comparing slope in later half (equilibrated)
     # Use last 50% of data for linear fit
