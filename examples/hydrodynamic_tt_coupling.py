@@ -8,7 +8,7 @@ nm = 1e-9
 
 
 def force(time, position, orientation):
-    """An oscillating force on particle 0"""
+    """An oscillating force on particle 0."""
     F = np.zeros_like(position)
     A = 2e-10
     omega = 800000

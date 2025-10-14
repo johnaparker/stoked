@@ -9,7 +9,7 @@ nm = 1e-9
 
 
 def torque(time, position, orientation):
-    """External, constant z-torque on all particles"""
+    """External, constant z-torque on all particles."""
     T = np.zeros_like(position)
     T[:, 2] = 4e-18
     return T

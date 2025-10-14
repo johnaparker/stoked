@@ -5,15 +5,14 @@ from scipy.integrate import quad
 
 
 class drag:
-    """Abstract base class for drag coeffecients
-    """
+    """Abstract base class for drag coeffecients."""
 
     __metaclass__ = ABCMeta
 
     def __init__(self, viscosity, isotropic=False):
         """Arguments:
         viscosity      dynamic viscosity µ of surrounding fluid
-        isotropic      (bool) True if the drag is isotropic
+        isotropic      (bool) True if the drag is isotropic.
         """
         self.viscosity = viscosity
         self.isotropic = isotropic
@@ -28,23 +27,22 @@ class drag:
 
     @property
     def drag_T(self):
-        """Translational drag coeffecient"""
+        """Translational drag coeffecient."""
         return self._drag_T()
 
     @property
     def drag_R(self):
-        """Rotational drag coeffecient"""
+        """Rotational drag coeffecient."""
         return self._drag_R()
 
 
 class drag_sphere(drag):
-    """Drag coeffecients for a sphere
-    """
+    """Drag coeffecients for a sphere."""
 
     def __init__(self, radius, viscosity):
         """Arguments:
         radius[N]      sphere radii
-        viscosity      dynamic viscosity µ of surrounding fluid
+        viscosity      dynamic viscosity µ of surrounding fluid.
         """
         super().__init__(viscosity, isotropic=True)
         self.radius = np.asarray(radius, dtype=float)
@@ -57,13 +55,12 @@ class drag_sphere(drag):
 
 
 class drag_ellipsoid(drag):
-    """Drag coeffecients for an ellipsoid
-    """
+    """Drag coeffecients for an ellipsoid."""
 
     def __init__(self, radii, viscosity):
         """Arguments:
         radii[N,3]     ellipsoid radii
-        viscosity      dynamic viscosity µ of surrounding fluid
+        viscosity      dynamic viscosity µ of surrounding fluid.
         """
         super().__init__(viscosity)
         self.radii = np.atleast_2d(np.asarray(radii, dtype=float))
@@ -72,20 +69,22 @@ class drag_ellipsoid(drag):
 
         for i in range(len(self.radii)):
             a, b, c = self.radii[i]
-            integrand = lambda t: 1 / np.sqrt((1 + t) * ((b / a) ** 2 + t) * ((c / a) ** 2 + t))
+            def integrand(t):
+                return 1 / np.sqrt((1 + t) * ((b / a) ** 2 + t) * ((c / a) ** 2 + t))
             self.chi_0[i] = b * c * quad(integrand, 0, np.inf)[0]
 
             for j, comp in enumerate([a, b, c]):
-                integrand = lambda t: 1 / (
-                    (1 + t) * np.sqrt(((a / comp) ** 2 + t) * ((b / comp) ** 2 + t) * ((c / comp) ** 2 + t))
-                )
+                def integrand(t):
+                    return 1 / (
+                                    (1 + t) * np.sqrt(((a / comp) ** 2 + t) * ((b / comp) ** 2 + t) * ((c / comp) ** 2 + t))
+                                )
                 self.alpha_0[i][j] = a * b * c / comp * quad(integrand, 0, np.inf)[0]
 
     def _drag_T(self):
         D = np.zeros_like(self.radii)
         for i in range(len(self.radii)):
             a, b, c = self.radii[i]
-            for j, comp in enumerate([a, b, c]):
+            for j, _comp in enumerate([a, b, c]):
                 D[i][j] = 16 * np.pi * self.viscosity * a * b * c / (self.chi_0[i] + self.alpha_0[i][j])
 
         return D

@@ -2,7 +2,7 @@ from stoked.forces import pairwise_central_force
 
 
 def lennard_jones(rmin, eps):
-    """Lennard-Jones pairwise interactions
+    """Lennard-Jones pairwise interactions.
 
     Arguments:
         rmin       distance where potential is a minimum

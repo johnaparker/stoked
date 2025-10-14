@@ -9,13 +9,15 @@ import matplotlib.pyplot as plt
 import stoked
 
 
-def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwargs={}, dt=None, time_unit="s"):
-    """Create N shapshots of a trajectory
+def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwargs=None, dt=None, time_unit="s"):
+    """Create N shapshots of a trajectory.
 
     Arguments:
         trajectory     trajectory data for T steps, N particles
         patches        patches object to represent particles
     """
+    if circle_kwargs is None:
+        circle_kwargs = {}
     if isinstance(N, Iterable):
         Nrow, Ncol = N
     else:
@@ -45,7 +47,7 @@ def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwar
     else:
         angles = [None] * len(trajectory.position)
 
-    Nsteps = trajectory.position.shape[0]
+    trajectory.position.shape[0]
     Nparticles = trajectory.position.shape[1]
 
     if patches is not None:

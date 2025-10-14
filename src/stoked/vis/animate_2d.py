@@ -32,7 +32,7 @@ def collection_patch(mpatches, size=0):
 def rotation_transform(axis, angle, ax=None):
     """Return a rotation transfrom that rotates around an axis by an angle
     axix[2]       (x,y) center of rotation
-    angle         angle of rotation (in degrees)
+    angle         angle of rotation (in degrees).
     """
     if ax is None:
         ax = plt.gca()
@@ -55,14 +55,14 @@ def animation_2d(
     number_labels=False,
     trail=100,
     trail_type="fading",
-    time_kwargs={},
-    label_kwargs={},
-    circle_kwargs={},
-    trail_kwargs={},
-    fading_kwargs={},
+    time_kwargs=None,
+    label_kwargs=None,
+    circle_kwargs=None,
+    trail_kwargs=None,
+    fading_kwargs=None,
     **kwargs,
 ):
-    """Create a 2D animation of trajectories
+    """Create a 2D animation of trajectories.
 
     Arguments:
          func                       function that returns (x,y) coordinates and angles
@@ -82,6 +82,16 @@ def animation_2d(
          fading_kwargs              Fading line properites, {max_lw, min_lw}
          kwargs                     Additional kwargs for FuncAnimation
     """
+    if fading_kwargs is None:
+        fading_kwargs = {}
+    if trail_kwargs is None:
+        trail_kwargs = {}
+    if circle_kwargs is None:
+        circle_kwargs = {}
+    if label_kwargs is None:
+        label_kwargs = {}
+    if time_kwargs is None:
+        time_kwargs = {}
     trail_types = ["solid", "fading"]
     if trail_type not in trail_types:
         raise ValueError(f"trail_type '{trail_type}' is not valid. Choose from {trail_types}")
@@ -273,7 +283,7 @@ def animation_2d(
 
 
 def trajectory_animation(trajectory, patches=None, *args, **kwargs):
-    """Create a 2D animation give trajectory data
+    """Create a 2D animation give trajectory data.
 
     Arguments:
         trajectory     trajectory data for T steps, N particles

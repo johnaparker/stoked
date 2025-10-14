@@ -4,7 +4,9 @@ from scipy import constants
 density_water = 997
 
 
-def gravity(volume, density, density_medium=density_water, direction=[0, 0, -1]):
+def gravity(volume, density, density_medium=density_water, direction=None):
+    if direction is None:
+        direction = [0, 0, -1]
     direction = np.asarray(direction, dtype=float)
 
     def force(time, position, orientation):
@@ -25,11 +27,15 @@ def gravity(volume, density, density_medium=density_water, direction=[0, 0, -1])
     return force
 
 
-def gravity_sphere(radius, density, density_medium=density_water, direction=[0, 0, -1]):
+def gravity_sphere(radius, density, density_medium=density_water, direction=None):
+    if direction is None:
+        direction = [0, 0, -1]
     volume = 4 / 3 * np.pi * radius**3
     return gravity(volume, density, density_medium, direction)
 
 
-def gravity_ellipsoid(radii, density, density_medium=density_water, direction=[0, 0, -1]):
+def gravity_ellipsoid(radii, density, density_medium=density_water, direction=None):
+    if direction is None:
+        direction = [0, 0, -1]
     volume = 4 / 3 * np.pi * np.product(radii, axis=-1)
     return gravity(volume, density, density_medium, direction)

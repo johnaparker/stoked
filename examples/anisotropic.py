@@ -8,14 +8,14 @@ nm = 1e-9
 
 
 def torque(time, position, orientation):
-    """External, constant z-torque on all particles"""
+    """External, constant z-torque on all particles."""
     T = np.zeros_like(position)
     T[:, 2] = 2e-21
     return T
 
 
 def force(time, position, orientation):
-    """External, constant z-torque on all particles"""
+    """External, constant z-torque on all particles."""
     F = np.zeros_like(position)
     F[:, 0] = 2e-13
     return F

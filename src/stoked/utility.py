@@ -1,5 +1,4 @@
-"""Utility functions
-"""
+"""Utility functions."""
 
 import numpy as np
 import quaternion
@@ -7,7 +6,7 @@ from scipy.integrate import cumtrapz
 
 
 def quaternion_to_angles(quat, reference=None):
-    """Convert a quaternion array to an angle representation
+    """Convert a quaternion array to an angle representation.
 
     Arguments:
         quat        [T,...] quaternion trajectory of T time-steps

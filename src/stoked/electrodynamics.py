@@ -1,5 +1,4 @@
-"""Electrodynamic interactions in the point-dipole approximation
-"""
+"""Electrodynamic interactions in the point-dipole approximation."""
 
 import numpy as np
 import quaternion
@@ -9,7 +8,7 @@ from stoked import interactions
 
 
 def greens(R, k, eps_b=1):
-    """Return the Green's matrix"""
+    """Return the Green's matrix."""
     r = np.linalg.norm(R)
     A = np.exp(1j * k * r) / (4 * np.pi * constants.epsilon_0 * eps_b * r**3)
     B = (3 - 3j * k * r - k**2 * r**2) / r**2 * np.outer(R, R)
@@ -18,7 +17,7 @@ def greens(R, k, eps_b=1):
 
 
 def greens_any_dim(R, k, eps_b=1, delta=0):
-    """Return the Green's matrix"""
+    """Return the Green's matrix."""
     # R shape: [...,3]
     r = np.linalg.norm(R, axis=-1) + delta  # shape [...]
     A = np.exp(1j * k * r) / (4 * np.pi * constants.epsilon_0 * eps_b * r**3)  # shape [...]
@@ -29,7 +28,7 @@ def greens_any_dim(R, k, eps_b=1, delta=0):
 
 
 def polarizability_sphere(radius, eps, wavelength, eps_b=1, dynamic_correction=True):
-    """Polarizability of a sphere. Returns (static alpha, dynamic alpha)
+    """Polarizability of a sphere. Returns (static alpha, dynamic alpha).
 
     Arguments:
         radius         sphere radius
@@ -53,7 +52,7 @@ def polarizability_sphere(radius, eps, wavelength, eps_b=1, dynamic_correction=T
 
 
 class point_dipole_electrodynamics(interactions):
-    """Perform point dipole electrodynamic interactions"""
+    """Perform point dipole electrodynamic interactions."""
 
     def __init__(self, alpha, source, wavelength, eps_b=1, interactions=True):
         """Arguments:
@@ -62,7 +61,7 @@ class point_dipole_electrodynamics(interactions):
         wavelength      wavelength of illumination (in meters)
         eps_b           background permitivitty (default: 1)
         interactions    include particle interactions (default: True)
-        use_dynamic_polarizability       modify the input alpha to be frequency corrected
+        use_dynamic_polarizability       modify the input alpha to be frequency corrected.
         """
         self.Nparticles = len(alpha[0])
 
@@ -85,7 +84,7 @@ class point_dipole_electrodynamics(interactions):
         self.G = np.zeros(shape=(self.Nparticles, 3, self.Nparticles, 3), dtype=complex)
 
     def solve(self):
-        """Solve for the electric fields given the current state of particles"""
+        """Solve for the electric fields given the current state of particles."""
         Einc = self.source.E_field(*self.position.T, self.k).T
 
         rot = quaternion.as_rotation_matrix(self.orientation)
@@ -112,7 +111,7 @@ class point_dipole_electrodynamics(interactions):
             self.sol = np.linalg.tensorsolve(A, Einc)
 
     def Efield(self, r, inc=True, delta=1e-13):
-        """Compute the electic field at positions r[...,3] due to all particles
+        """Compute the electic field at positions r[...,3] due to all particles.
 
         Arguments:
               r         positions (shape: [...,3])
@@ -134,10 +133,10 @@ class point_dipole_electrodynamics(interactions):
         self.solve()
 
     def force(self):
-        """Return the force and torque on all particles, (F[N,3],T[N,3])"""
+        """Return the force and torque on all particles, (F[N,3],T[N,3])."""
 
         def Efield_without(r, i):
-            """Compute Efield without particle i"""
+            """Compute Efield without particle i."""
             E = self.source.E_field(*r, self.k)
             for j in range(self.Nparticles):
                 if i == j:
@@ -161,7 +160,7 @@ class point_dipole_electrodynamics(interactions):
         return F
 
     def torque(self):
-        """Return the force and torque on all particles, (F[N,3],T[N,3])"""
+        """Return the force and torque on all particles, (F[N,3],T[N,3])."""
         T = np.zeros([self.Nparticles, 3])
 
         for i in range(self.Nparticles):

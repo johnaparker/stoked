@@ -24,7 +24,7 @@ class predictor_corrector_integrator(integrator):
             w1 = self.alpha_R * T
             w1_q = np.array([np.quaternion(*omega) for omega in w1])
 
-            w0 = np.copy(self.solver.angular_velocity)
+            np.copy(self.solver.angular_velocity)
             o0 = np.copy(self.solver.orientation)
             self.solver.angular_velocity = w1
             self.solver.orientation = (1 + w1_q * self.dt / 2) * self.solver.orientation
@@ -43,7 +43,7 @@ class predictor_corrector_integrator(integrator):
             T = self.solve_torques()
             w2 = self.alpha_R * T
             w2_q = np.array([np.quaternion(*omega) for omega in w1])
-            w_q = (w1_q + w2_q) / 2
+            (w1_q + w2_q) / 2
 
             self.solver.angular_velocity = (w1 + w2) / 2
             self.solver.orientation = (1 + w1_q * self.dt / 2) * o0

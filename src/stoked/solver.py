@@ -22,27 +22,23 @@ class trajectory:
 
 
 class interactions:
-    """Abstract base class for particle interactions
-    """
+    """Abstract base class for particle interactions."""
 
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def force(self):
-        """Return the force[N,3] based on the current state
-        """
+        """Return the force[N,3] based on the current state."""
         pass
 
     @abstractmethod
     def torque(self):
-        """Return the torque[N,3] based on the current state
-        """
+        """Return the torque[N,3] based on the current state."""
         pass
 
     @abstractmethod
     def update(self):
-        """Update the current state
-        """
+        """Update the current state."""
         pass
 
     def _update(self, time, position, orientation, temperature):
@@ -54,8 +50,7 @@ class interactions:
 
 
 class stokesian_dynamics:
-    """Perform a Stokesian dynamics simulation, with optional external and internal interactions and rotational dynamics
-    """
+    """Perform a Stokesian dynamics simulation, with optional external and internal interactions and rotational dynamics."""
 
     def __init__(
         self,
@@ -87,7 +82,7 @@ class stokesian_dynamics:
         interface          no-slip boundary interface (default: no interface)
         inertia            inertia coefficients of base type stoked.inertia (default: over-damped dynamics)
         hydrodynamic_coupling    if True, include hydrodynamic coupling interactions (default: True)
-        integrator         dynamics integrator
+        integrator         dynamics integrator.
         """
         self.temperature = temperature
         self.dt = dt
@@ -178,15 +173,14 @@ class stokesian_dynamics:
         self._num_thermal_steps = 1
 
     def step(self):
-        """Time-step the positions (and orientations) by dt
-        """
+        """Time-step the positions (and orientations) by dt."""
         self.integrator.pre_step()
-        for n in range(self._num_thermal_steps):
+        for _n in range(self._num_thermal_steps):
             self.step_func()
             self.integrator.post_step()
 
     def run(self, Nsteps, progress=True):
-        """Run the simulation for Nsteps, returning the trajectories
+        """Run the simulation for Nsteps, returning the trajectories.
 
         Arguments:
             Nsteps       number of steps to run
@@ -208,7 +202,7 @@ class stokesian_dynamics:
         return trajectory(position, orientation)
 
     def run_until(self, condition):
-        """Run the simulation until some condition is met, returning the trajectories
+        """Run the simulation until some condition is met, returning the trajectories.
 
         Arguments:
             condition    Function to return True when simulation should terminate
@@ -236,7 +230,7 @@ class stokesian_dynamics:
         return trajectory(position, orientation)
 
     def _update_interactions(self, time, position, orientation):
-        """FOR INTERNAL USE ONLY
+        """FOR INTERNAL USE ONLY.
 
         update the interactions given a new (or predicted) position and orientation
         """
@@ -245,7 +239,7 @@ class stokesian_dynamics:
                 I._update(time, position, orientation, self.temperature)
 
     def _total_force(self, time, position, orientation):
-        """FOR INTERNAL USE ONLY
+        """FOR INTERNAL USE ONLY.
 
         return the total force at a given time, position, and orientation
         """
@@ -256,7 +250,7 @@ class stokesian_dynamics:
         return F
 
     def _total_torque(self, time, position, orientation):
-        """FOR INTERNAL USE ONLY
+        """FOR INTERNAL USE ONLY.
 
         return the total torque at a given time, position, and orientation
         """
@@ -271,7 +265,7 @@ class stokesian_dynamics:
 
         if self.interactions is not None:
             pairwise_forces = []
-            for i, I in enumerate(self.interactions):
+            for _i, I in enumerate(self.interactions):
                 if isinstance(I, pairwise_central_force):
                     pairwise_forces.append(I)
 
@@ -310,7 +304,7 @@ def brownian_dynamics(
     inertia=None,
     integrator=None,
 ):
-    """Perform a Brownian dynamics simulation, with optional external and internal interactions and rotational dynamics
+    """Perform a Brownian dynamics simulation, with optional external and internal interactions and rotational dynamics.
 
     Arguments:
         temperature        system temperature

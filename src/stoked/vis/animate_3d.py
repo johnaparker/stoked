@@ -66,7 +66,7 @@ def _trajectory_animation_3d(
     axes_length=1,
     grid=False,
 ):
-    """Create a 3D trajectory animation with VPython
+    """Create a 3D trajectory animation with VPython.
 
     Arguments:
         trajectory        trajectory data for T steps, N particles

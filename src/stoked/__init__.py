@@ -1,4 +1,4 @@
-"""StokeD
+"""StokeD.
 =======
 Simulation and visualization of Stokesian motion
 """

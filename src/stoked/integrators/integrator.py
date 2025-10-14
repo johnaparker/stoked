@@ -8,7 +8,7 @@ from stoked.hydrodynamics import grand_mobility_matrix, particle_wall_self_mobil
 
 
 def fluctuation(friction, temperature, dt):
-    """Given a friction matrix, return the fluctuation matrix"""
+    """Given a friction matrix, return the fluctuation matrix."""
     if temperature == 0:
         return np.zeros_like(friction)
     else:

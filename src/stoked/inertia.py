@@ -4,15 +4,14 @@ import numpy as np
 
 
 class inertia:
-    """Abstract base class for drag coeffecients
-    """
+    """Abstract base class for drag coeffecients."""
 
     __metaclass__ = ABCMeta
 
     def __init__(self, density, isotropic=False):
         """Arguments:
         density        mass density of the object
-        isotropic      (bool) True if the moment of inertia is isotropic
+        isotropic      (bool) True if the moment of inertia is isotropic.
         """
         self.density = density
         self.isotropic = isotropic
@@ -27,23 +26,22 @@ class inertia:
 
     @property
     def mass(self):
-        """Particle mass"""
+        """Particle mass."""
         return self._mass()
 
     @property
     def moment(self):
-        """Particle moment of inertia"""
+        """Particle moment of inertia."""
         return self._moment()
 
 
 class inertia_sphere(inertia):
-    """Inertia values for a sphere
-    """
+    """Inertia values for a sphere."""
 
     def __init__(self, radius, density):
         """Arguments:
         radii[N,3]     ellipsoid radii
-        density        mass density of the object
+        density        mass density of the object.
         """
         super().__init__(density, isotropic=True)
         self.radius = np.asarray(radius, dtype=float)
@@ -57,13 +55,12 @@ class inertia_sphere(inertia):
 
 
 class inertia_ellipsoid(inertia):
-    """Inertia values for an ellipsoid
-    """
+    """Inertia values for an ellipsoid."""
 
     def __init__(self, radii, density):
         """Arguments:
         radii[N,3]     ellipsoid radii
-        density        mass density of the object
+        density        mass density of the object.
         """
         super().__init__(density, isotropic=True)
         self.radii = np.atleast_2d(np.asarray(radii, dtype=float))

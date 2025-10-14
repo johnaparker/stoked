@@ -2,17 +2,17 @@ import numpy as np
 
 
 class interface:
-    """A no-slip interface"""
+    """A no-slip interface."""
 
     def __init__(self, z=0):
         """Arguments:
-        z   z-position of the interface
+        z   z-position of the interface.
         """
         self.z = z
 
 
 def levi_civita():
-    """Return the levi-civita symbol"""
+    """Return the levi-civita symbol."""
     eijk = np.zeros((3, 3, 3), dtype=float)
     eijk[0, 1, 2] = eijk[1, 2, 0] = eijk[2, 0, 1] = 1
     eijk[0, 2, 1] = eijk[2, 1, 0] = eijk[1, 0, 2] = -1
@@ -20,7 +20,7 @@ def levi_civita():
 
 
 def particle_wall_self_mobility(position, interface, viscosity, radius):
-    """Construct the particle wall self-mobility matrix for a single particle
+    """Construct the particle wall self-mobility matrix for a single particle.
 
     Arguments:
         position[3]       position of particle
@@ -46,7 +46,7 @@ def particle_wall_self_mobility(position, interface, viscosity, radius):
 
 
 def grand_mobility_matrix(position, drag_T, drag_R, viscosity):
-    """Construct the grand mobility matrix for a given cluster
+    """Construct the grand mobility matrix for a given cluster.
 
     Arguments:
         position[N,3]     position of N particles

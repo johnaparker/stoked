@@ -13,7 +13,7 @@ def van_der_waals_sphere(radius, hamaker):
         if not np.ndim(radius):
             radius = np.full(Nparticles, radius, dtype=float)
 
-        factor = 2 * self.hamaker / 3
+        2 * self.hamaker / 3
         T1 = np.outer(radius, radius)
         T2 = np.add.outer(radius, radius) ** 2
         T3 = np.substract.outer(radius, radius) ** 2

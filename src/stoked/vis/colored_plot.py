@@ -9,7 +9,7 @@ class colored_line:
         x[N]                   xdata
         y[N]                   ydata
         c[N], c[N,3], c[N,4]   color data
-        **kwargs               kwargs valid for matplotlib.LineCollection
+        **kwargs               kwargs valid for matplotlib.LineCollection.
         """
         x = np.asarray(x)
         y = np.asarray(y)
@@ -26,7 +26,7 @@ class colored_line:
         """Set new x and y data, optionally new color data
         x[N]                   xdata
         y[N]                   ydata
-        c[N], c[N,3], c[N,4]   color data (default: current colors)
+        c[N], c[N,3], c[N,4]   color data (default: current colors).
         """
         xy = np.vstack([x, y]).T
         xy = xy.reshape(-1, 1, 2)
@@ -38,7 +38,7 @@ class colored_line:
 
     def set_xdata(self, x):
         """Set new x (must be same size as current y data)
-        x[N]                   xdata
+        x[N]                   xdata.
         """
         segments = np.array(self.collection.get_segments())
         segments[:, 0, 0] = x[:-1]
@@ -47,7 +47,7 @@ class colored_line:
 
     def set_ydata(self, y):
         """Set new y (must be same size as current x data)
-        y[N]                   ydata
+        y[N]                   ydata.
         """
         segments = np.array(self.collection.get_segments())
         segments[:, 0, 1] = y[:-1]
@@ -56,7 +56,7 @@ class colored_line:
 
     def set_colors(self, c):
         """Set new color data
-        c[N], c[N,3], c[N,4]   color data
+        c[N], c[N,3], c[N,4]   color data.
         """
         self.collection.set_edgecolor(c)
 
@@ -73,7 +73,7 @@ def colored_plot(x, y, c, ax=None, **kwargs):
     y[N]                   ydata
     c[N], c[N,3], c[N,4]   color data
     ax                     axis (default: current axis)
-    **kwargs               kwargs valid for matplotlib.LineCollection
+    **kwargs               kwargs valid for matplotlib.LineCollection.
     """
     if ax is None:
         ax = plt.gca()
