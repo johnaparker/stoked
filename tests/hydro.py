@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from topics.photonic_clusters.create_lattice import hexagonal_lattice_particles
 
-from stoked import circle_patches, drag_sphere, stokesian_dynamics, trajectory_animation
+from stoked import circle_patches, drag_sphere, hexagonal_lattice_particles, stokesian_dynamics, trajectory_animation
 
 position = [[0, 0, 0], [600e-9, 0, 0]]
 position = 600e-9 * hexagonal_lattice_particles(7)

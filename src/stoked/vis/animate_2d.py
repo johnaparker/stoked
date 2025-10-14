@@ -223,6 +223,12 @@ def animation_2d(
     # history = np.zeros((trail,) + positions.shape, dtype=float)
     history = np.tile(positions, (trail, 1, 1))
 
+    def _get_artist(obj):
+        """Extract the Artist from an object, handling colored_line wrappers."""
+        if hasattr(obj, 'collection'):
+            return obj.collection
+        return obj
+
     def update(t):
         nonlocal history
 
@@ -266,15 +272,18 @@ def animation_2d(
             if number_labels:
                 text[str(i + 1)].set_position(pos)
 
-        return trails + particles + list(lines.values()) + list(text.values()) + dots
+        trail_artists = [_get_artist(t) for t in trails]
+        return trail_artists + particles + list(lines.values()) + list(text.values()) + dots
 
     def init():
         positions, angles = func(0)
         positions = np.asarray(positions, dtype=float)
-        angles = np.asarray(angles, dtype=float)
+        if angles is not None:
+            angles = np.asarray(angles, dtype=float)
 
         history[...] = np.tile(positions, (trail, 1, 1))
-        return trails + particles + list(lines.values()) + list(text.values()) + dots
+        trail_artists = [_get_artist(t) for t in trails]
+        return trail_artists + particles + list(lines.values()) + list(text.values()) + dots
 
     kw = dict(interval=30, repeat=True, blit=True)
     kw.update(kwargs)

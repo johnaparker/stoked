@@ -22,7 +22,7 @@ from .gravity import gravity, gravity_ellipsoid, gravity_sphere
 from .hydrodynamics import grand_mobility_matrix, interface
 from .inertia import inertia, inertia_ellipsoid, inertia_sphere
 from .solver import brownian_dynamics, interactions, stokesian_dynamics, trajectory
-from .utility import quaternion_to_angles
+from .utility import hexagonal_lattice_layers, hexagonal_lattice_particles, quaternion_to_angles
 from .van_der_waals import van_der_waals_sphere, van_der_waals_sphere_interface
 from .vis import (
     circle_patches,

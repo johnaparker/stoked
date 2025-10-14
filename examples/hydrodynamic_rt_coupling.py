@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from topics.photonic_clusters.create_lattice import hexagonal_lattice_particles
 
 import stoked
 
@@ -15,7 +14,7 @@ def torque(time, position, orientation):
     return T
 
 
-initial = hexagonal_lattice_particles(7) * 600 * nm
+initial = stoked.hexagonal_lattice_particles(7) * 600 * nm
 
 np.random.seed(0)
 sim = stoked.stokesian_dynamics(
