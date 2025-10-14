@@ -2,6 +2,20 @@ StokeD
 ==============
 StokeD solves the Stokesian dynamics (SD) equations for N interacting particles. SD is a generalization of Brownian dynamics (BD) that includes hydrodynamic coupling interactions.
 
+
+<p align="center">
+  <img src="./docs/estatics.png" width="500" alt="">
+  <br>
+  <em>Electrically charged particles repulsed from each other confined in a harmonic potential</em>
+</p>
+
+<p align="center">
+  <img src="./docs/rt_coupling.png.png" width="500" alt="">
+  <br>
+  <em>Seven particles spinning due to an applied torque; the rotation of the fluid results in translational motion of the outer particles</em>
+</p>
+
+
 Features
 --------------
 + Hydrodynamic coupling interactions can be turned on or off
