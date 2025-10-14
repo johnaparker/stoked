@@ -10,7 +10,7 @@ StokeD solves the Stokesian dynamics (SD) equations for N interacting particles.
 </p>
 
 <p align="center">
-  <img src="./docs/rt_coupling.png.png" width="500" alt="">
+  <img src="./docs/rt_coupling.png" width="500" alt="">
   <br>
   <em>Seven particles spinning due to an applied torque; the rotation of the fluid results in translational motion of the outer particles</em>
 </p>
