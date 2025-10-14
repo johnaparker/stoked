@@ -1,12 +1,14 @@
-import numpy as np
-import matplotlib as mpl
-from itertools import cycle
-import quaternion
-import stoked
 from collections.abc import Iterable
-import matplotlib.colors as mcolors
-from stoked.vis._internal import patches
+from itertools import cycle
 from multiprocessing import Process
+
+import matplotlib as mpl
+import matplotlib.colors as mcolors
+import numpy as np
+import quaternion
+
+import stoked
+from stoked.vis._internal import patches
 
 
 def sphere_patches(radius):

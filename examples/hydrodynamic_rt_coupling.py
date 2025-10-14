@@ -1,7 +1,8 @@
-import stoked
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from topics.photonic_clusters.create_lattice import hexagonal_lattice_particles
+
+import stoked
 
 us = 1e-6
 nm = 1e-9

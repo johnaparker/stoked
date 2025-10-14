@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
+
 import numpy as np
-from scipy.constants import k as kb
-from stoked.hydrodynamics import particle_wall_self_mobility, grand_mobility_matrix
 import quaternion
+from scipy.constants import k as kb
+
+from stoked.hydrodynamics import grand_mobility_matrix, particle_wall_self_mobility
 
 
 def fluctuation(friction, temperature, dt):

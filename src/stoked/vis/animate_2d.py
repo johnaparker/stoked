@@ -1,16 +1,18 @@
-from itertools import cycle
-from copy import deepcopy
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib import animation
-from .colored_plot import colored_plot
-import matplotlib.patheffects as path_effects
-from tqdm import tqdm
-import matplotlib.colors as mcolors
 from collections.abc import Iterable
+from copy import deepcopy
+from itertools import cycle
+
+import matplotlib as mpl
+import matplotlib.colors as mcolors
+import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import animation
+
 import stoked
-from stoked.vis._internal import atleast, patches
+from stoked.vis._internal import patches
+
+from .colored_plot import colored_plot
 
 
 def circle_patches(radius):
@@ -30,8 +32,8 @@ def collection_patch(mpatches, size=0):
 def rotation_transform(axis, angle, ax=None):
     """Return a rotation transfrom that rotates around an axis by an angle
     axix[2]       (x,y) center of rotation
-    angle         angle of rotation (in degrees)"""
-
+    angle         angle of rotation (in degrees)
+    """
     if ax is None:
         ax = plt.gca()
     t_scale = ax.transData
@@ -82,7 +84,7 @@ def animation_2d(
     """
     trail_types = ["solid", "fading"]
     if trail_type not in trail_types:
-        raise ValueError("trail_type '{}' is not valid. Choose from {}".format(trail_type, trail_types))
+        raise ValueError(f"trail_type '{trail_type}' is not valid. Choose from {trail_types}")
     if trail_type == "fading" and trail == np.inf:
         raise ValueError("trail cannot be fading and infinite")
 
@@ -201,7 +203,7 @@ def animation_2d(
         text["clock"] = ax.text(
             0.98,
             0.02,
-            r"{0:.2f} {1}".format(0.0, time_unit),
+            rf"{0.0:.2f} {time_unit}",
             transform=ax.transAxes,
             horizontalalignment="right",
             animated=True,
@@ -246,7 +248,7 @@ def animation_2d(
                 dots[i].center = inv(pos[:2])
 
             if time is not None:
-                text["clock"].set_text(r"{0:.2f} {1}".format(time[t], time_unit))
+                text["clock"].set_text(rf"{time[t]:.2f} {time_unit}")
 
             if trail > 0:
                 trails[i].set_data(history[:, i, 0], history[:, i, 1])
@@ -271,8 +273,7 @@ def animation_2d(
 
 
 def trajectory_animation(trajectory, patches=None, *args, **kwargs):
-    """
-    Create a 2D animation give trajectory data
+    """Create a 2D animation give trajectory data
 
     Arguments:
         trajectory     trajectory data for T steps, N particles

@@ -1,10 +1,10 @@
-"""
-Electrodynamic interactions in the point-dipole approximation
+"""Electrodynamic interactions in the point-dipole approximation
 """
 
 import numpy as np
-from scipy import constants
 import quaternion
+from scipy import constants
+
 from stoked import interactions
 
 
@@ -29,8 +29,7 @@ def greens_any_dim(R, k, eps_b=1, delta=0):
 
 
 def polarizability_sphere(radius, eps, wavelength, eps_b=1, dynamic_correction=True):
-    """
-    Polarizability of a sphere. Returns (static alpha, dynamic alpha)
+    """Polarizability of a sphere. Returns (static alpha, dynamic alpha)
 
     Arguments:
         radius         sphere radius
@@ -65,7 +64,6 @@ class point_dipole_electrodynamics(interactions):
         interactions    include particle interactions (default: True)
         use_dynamic_polarizability       modify the input alpha to be frequency corrected
         """
-
         self.Nparticles = len(alpha[0])
 
         self.alpha_0 = np.zeros([self.Nparticles, 3, 3], dtype=complex)
@@ -88,7 +86,6 @@ class point_dipole_electrodynamics(interactions):
 
     def solve(self):
         """Solve for the electric fields given the current state of particles"""
-
         Einc = self.source.E_field(*self.position.T, self.k).T
 
         rot = quaternion.as_rotation_matrix(self.orientation)
@@ -122,7 +119,6 @@ class point_dipole_electrodynamics(interactions):
               inc       include the incident field (default: True)
               delta     pad the distance between point and scatterers by delta (to avoid singularities)
         """
-
         if inc:
             E = self.source.E_field(*r.T, self.k).T
         else:

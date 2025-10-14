@@ -1,14 +1,14 @@
-import stoked
-import numpy as np
 import matplotlib.pyplot as plt
-from topics.photonic_clusters.create_lattice import hexagonal_lattice_particles
+import numpy as np
+
+import stoked
 
 us = 1e-6
 nm = 1e-9
 
 
 def force(time, position, orientation):
-    """an oscillating force on particle 0"""
+    """An oscillating force on particle 0"""
     F = np.zeros_like(position)
     A = 2e-10
     omega = 800000

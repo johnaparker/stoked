@@ -1,20 +1,19 @@
-import numpy as np
 from abc import ABCMeta, abstractmethod
+
+import numpy as np
 from scipy.integrate import quad
 
 
 class drag:
-    """
-    Abstract base class for drag coeffecients
+    """Abstract base class for drag coeffecients
     """
 
     __metaclass__ = ABCMeta
 
     def __init__(self, viscosity, isotropic=False):
-        """
-        Arguments:
-            viscosity      dynamic viscosity µ of surrounding fluid
-            isotropic      (bool) True if the drag is isotropic
+        """Arguments:
+        viscosity      dynamic viscosity µ of surrounding fluid
+        isotropic      (bool) True if the drag is isotropic
         """
         self.viscosity = viscosity
         self.isotropic = isotropic
@@ -29,25 +28,23 @@ class drag:
 
     @property
     def drag_T(self):
-        """translational drag coeffecient"""
+        """Translational drag coeffecient"""
         return self._drag_T()
 
     @property
     def drag_R(self):
-        """rotational drag coeffecient"""
+        """Rotational drag coeffecient"""
         return self._drag_R()
 
 
 class drag_sphere(drag):
-    """
-    Drag coeffecients for a sphere
+    """Drag coeffecients for a sphere
     """
 
     def __init__(self, radius, viscosity):
-        """
-        Arguments:
-            radius[N]      sphere radii
-            viscosity      dynamic viscosity µ of surrounding fluid
+        """Arguments:
+        radius[N]      sphere radii
+        viscosity      dynamic viscosity µ of surrounding fluid
         """
         super().__init__(viscosity, isotropic=True)
         self.radius = np.asarray(radius, dtype=float)
@@ -60,15 +57,13 @@ class drag_sphere(drag):
 
 
 class drag_ellipsoid(drag):
-    """
-    Drag coeffecients for an ellipsoid
+    """Drag coeffecients for an ellipsoid
     """
 
     def __init__(self, radii, viscosity):
-        """
-        Arguments:
-            radii[N,3]     ellipsoid radii
-            viscosity      dynamic viscosity µ of surrounding fluid
+        """Arguments:
+        radii[N,3]     ellipsoid radii
+        viscosity      dynamic viscosity µ of surrounding fluid
         """
         super().__init__(viscosity)
         self.radii = np.atleast_2d(np.asarray(radii, dtype=float))

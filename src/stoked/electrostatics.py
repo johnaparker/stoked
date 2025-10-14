@@ -1,12 +1,12 @@
 import numpy as np
 from scipy import constants
+
 from stoked import interactions
 from stoked.forces import pairwise_central_force
 
 
 def electrostatics(charges):
-    """
-    Free-space point electrostatic interactions
+    """Free-space point electrostatic interactions
     """
     ke = 1 / (4 * np.pi * constants.epsilon_0)
 
@@ -23,8 +23,7 @@ def electrostatics(charges):
 
 
 def double_layer_sphere(radius, potential, temperature=300, debye=27.6e-9, eps_m=80.4, zp=1):
-    """
-    Electrostatic interactions in a fluid medium for spheres
+    """Electrostatic interactions in a fluid medium for spheres
     """
     radius = np.asarray(radius, dtype=float)
     potential = np.asarray(potential, dtype=float)
@@ -61,8 +60,7 @@ def double_layer_sphere(radius, potential, temperature=300, debye=27.6e-9, eps_m
 
 
 class double_layer_sphere_interface(interactions):
-    """
-    Electrostatic interactions in a fluid medium near an interface
+    """Electrostatic interactions in a fluid medium near an interface
     """
 
     def __init__(self, radius, potential, potential_interface, debye=27.6e-9, eps_m=80.4, zp=1, zpos=0):

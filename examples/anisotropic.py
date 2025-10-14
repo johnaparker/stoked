@@ -1,6 +1,7 @@
-import stoked
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
+import stoked
 
 us = 1e-6
 nm = 1e-9

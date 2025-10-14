@@ -1,8 +1,10 @@
-from stoked import brownian_dynamics, trajectory_animation, drag_sphere
 from functools import partial
+
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
+
+from stoked import brownian_dynamics, drag_sphere, trajectory_animation
 
 
 def bigaussian_force(t, rvec, orientation, rvec1, rvec2, A1=1, w1=1, A2=1, w2=1):

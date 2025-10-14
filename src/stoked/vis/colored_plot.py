@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.collections import LineCollection
 
 
@@ -28,7 +28,6 @@ class colored_line:
         y[N]                   ydata
         c[N], c[N,3], c[N,4]   color data (default: current colors)
         """
-
         xy = np.vstack([x, y]).T
         xy = xy.reshape(-1, 1, 2)
         segments = np.hstack([xy[:-1], xy[1:]])

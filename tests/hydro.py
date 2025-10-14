@@ -1,10 +1,8 @@
-from stoked import stokesian_dynamics, trajectory_animation, drag_sphere, circle_patches
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import numpy as np
 from topics.photonic_clusters.create_lattice import hexagonal_lattice_particles
-from my_pytools.my_matplotlib.animation import save_animation
-from scipy.integrate import cumtrapz
+
+from stoked import circle_patches, drag_sphere, stokesian_dynamics, trajectory_animation
 
 position = [[0, 0, 0], [600e-9, 0, 0]]
 position = 600e-9 * hexagonal_lattice_particles(7)

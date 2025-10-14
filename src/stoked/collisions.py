@@ -1,4 +1,5 @@
 import numpy as np
+
 from stoked import interactions
 from stoked.forces import pairwise_central_force
 
@@ -21,16 +22,14 @@ def collisions_sphere(radius, kn):
 
 
 class collisions_sphere_interface(interactions):
-    """
-    Collision between spheres and a planar surface using the force model F = kn*overlap^1.5
+    """Collision between spheres and a planar surface using the force model F = kn*overlap^1.5
     """
 
     def __init__(self, radii, kn, zpos=0):
-        """
-        Arguments:
-            radii   particle radii
-            kn      force constant
-            zpos    z-position of the plane (default: 0)
+        """Arguments:
+        radii   particle radii
+        kn      force constant
+        zpos    z-position of the plane (default: 0)
         """
         self.radii = radii
         self.kn = kn

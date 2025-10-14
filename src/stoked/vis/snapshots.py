@@ -1,16 +1,16 @@
-import stoked
-from .animate_2d import circle_patches, ellipse_patches, collection_patch
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 from collections.abc import Iterable
-from itertools import cycle
 from copy import deepcopy
+from itertools import cycle
+
+import matplotlib as mpl
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+
+import stoked
 
 
 def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwargs={}, dt=None, time_unit="s"):
-    """
-    Create N shapshots of a trajectory
+    """Create N shapshots of a trajectory
 
     Arguments:
         trajectory     trajectory data for T steps, N particles
@@ -100,7 +100,7 @@ def trajectory_snapshots(trajectory, patches=None, N=5, colors=None, circle_kwar
             ax.text(
                 0.98,
                 0.02,
-                r"{0:.2f} {1}".format(dt * Ti, time_unit),
+                rf"{dt * Ti:.2f} {time_unit}",
                 transform=ax.transAxes,
                 horizontalalignment="right",
             )

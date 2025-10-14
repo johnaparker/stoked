@@ -1,5 +1,6 @@
-from . import integrator
 import numpy as np
+
+from . import integrator
 
 
 class basic_integrator(integrator):

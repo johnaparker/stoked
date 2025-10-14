@@ -1,10 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import stoked
 import miepy
-from scipy.integrate import cumtrapz
-from scipy import constants
+import numpy as np
 from miepy.constants import Z0
+from scipy import constants
+from scipy.integrate import cumtrapz
+
+import stoked
 
 nm = 1e-9
 radius = 75 * nm

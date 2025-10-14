@@ -1,8 +1,9 @@
-from stoked import brownian_dynamics, ellipsoid_drag, trajectory_animation
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import numpy as np
 from scipy.integrate import cumtrapz
+from tqdm import tqdm
+
+from stoked import brownian_dynamics, ellipsoid_drag, trajectory_animation
 
 position = [0, 0, 0]
 drag = ellipsoid_drag([1, 1.5, 1], 1)

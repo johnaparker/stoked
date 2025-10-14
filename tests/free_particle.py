@@ -1,7 +1,8 @@
-from stoked import brownian_dynamics, drag_sphere
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import numpy as np
+from tqdm import tqdm
+
+from stoked import brownian_dynamics, drag_sphere
 
 position = [0, 0, 0]
 drag = drag_sphere(0.2, 1)

@@ -1,7 +1,9 @@
-import stoked
-import numpy as np
 from functools import partial
+
 import matplotlib.pyplot as plt
+import numpy as np
+
+import stoked
 
 
 def harmonic_force(time, position, orientation, stiffness):

@@ -1,9 +1,11 @@
+from functools import partial
+
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
 import stoked
 from stoked import brownian_dynamics, drag_sphere
-from functools import partial
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-import numpy as np
 
 
 def uniform_force(t, rvec, orient, Fx):

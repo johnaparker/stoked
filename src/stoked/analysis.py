@@ -1,5 +1,4 @@
-"""
-Functions for post-processing analysis of trajectory data
+"""Functions for post-processing analysis of trajectory data
 """
 
 import numpy as np
@@ -8,8 +7,7 @@ from tqdm import tqdm
 
 
 def autocorrelation_fft(x):
-    """
-    compute the autocorrelation of x using the FFT
+    """Compute the autocorrelation of x using the FFT
     """
     N = len(x)
     F = np.fft.fft(x, n=2 * N)
@@ -22,8 +20,7 @@ def autocorrelation_fft(x):
 
 
 def msd_single(trajectory, fft=True):
-    """
-    Compute the mean-squared displacement (MSD) of a single trajectory
+    """Compute the mean-squared displacement (MSD) of a single trajectory
 
     Arguments:
         trajectory    shape [T,D] for a single trajectory of T steps in D dimensions
@@ -57,8 +54,7 @@ def msd_single(trajectory, fft=True):
 
 
 def msd(trajectory, fft=True):
-    """
-    Compute the mean-squared displacement (MSD) of a trajectory
+    """Compute the mean-squared displacement (MSD) of a trajectory
 
     Arguments:
         trajectory    shape [T,D] or [T,N,D] for a trajectory of T steps, N particles in D dimensions
@@ -123,8 +119,7 @@ def angle_of_cluster(trajectory, wrap=False, initial=0, N_cutoff=1):
 
 
 def transform_to_lattice(trajectory, lattice):
-    """
-    Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice
+    """Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice
 
     Arguments:
         trajectory[T,N,2]      trajecrory data with T steps, N particles in 2 dimensions
@@ -146,8 +141,7 @@ def transform_to_lattice(trajectory, lattice):
 
 
 def transform_to_lattice_2d(trajectory, lattice):
-    """
-    Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice in 2 dimensions
+    """Returns a new trajectory that is translated and rotated to be best aligned with a given fixed lattice in 2 dimensions
 
     Arguments:
         trajectory[T,N,2]      trajecrory data with T steps, N particles in 2 dimensions
@@ -207,8 +201,7 @@ def transform_to_lattice_2d(trajectory, lattice):
 
 
 def linear_stability_analysis(bd):
-    """
-    Perform a linear stability analysis for a given brownian dynamics simulation.
+    """Perform a linear stability analysis for a given brownian dynamics simulation.
     Returns (eigenvalues, eigenvectors)
     """
     # bd.run(2000)
@@ -242,8 +235,7 @@ def linear_stability_analysis(bd):
 
 
 def psi_n(trajectory, n, rmax, single=None):
-    """
-    Compute psi_n, a measure of the discrete rotational symmetry
+    """Compute psi_n, a measure of the discrete rotational symmetry
 
     Arguments:
         trajectory      particle trajectory
@@ -278,8 +270,7 @@ def psi_n(trajectory, n, rmax, single=None):
 
 
 def radial_distrubtion(pos, bins=100, range=None, weighted=False, dim=None):
-    """
-    Compute a radial distribution function. Returns (counts, bin_edges)
+    """Compute a radial distribution function. Returns (counts, bin_edges)
 
     Arguments:
         pos[T,N,ndim]     particle positions
@@ -304,8 +295,7 @@ def radial_distrubtion(pos, bins=100, range=None, weighted=False, dim=None):
 
 
 def radial_distrubtion_pair(p1, p2, bins=100, range=None, weighted=False, dim=None):
-    """
-    Compute a pair radial distribution function. Returns (counts, bin_edges)
+    """Compute a pair radial distribution function. Returns (counts, bin_edges)
 
     Arguments:
         p1[T,N1,ndim]     particle group 1 positions

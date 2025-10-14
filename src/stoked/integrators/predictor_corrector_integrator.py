@@ -1,5 +1,6 @@
-from . import integrator
 import numpy as np
+
+from . import integrator
 
 
 class predictor_corrector_integrator(integrator):

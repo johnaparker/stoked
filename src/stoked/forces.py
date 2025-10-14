@@ -1,16 +1,15 @@
 import numpy as np
+
 from stoked import interactions
 
 
 class pairwise_force(interactions):
-    """
-    Pair-wise interaction force
+    """Pair-wise interaction force
     """
 
     def __init__(self, force_func):
-        """
-        Arguments:
-            force_func     force function of the form F(r[dim]) -> [dim]
+        """Arguments:
+        force_func     force function of the form F(r[dim]) -> [dim]
         """
         self.force_func = force_func
 
@@ -38,9 +37,8 @@ class pairwise_force(interactions):
 
 class pairwise_central_force(interactions):
     def __init__(self, force_func):
-        """
-        Arguments:
-            force_func     force function of the form F(r[dim]) -> [dim]
+        """Arguments:
+        force_func     force function of the form F(r[dim]) -> [dim]
         """
         self.force_func = force_func
 

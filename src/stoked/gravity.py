@@ -1,5 +1,5 @@
-from scipy import constants
 import numpy as np
+from scipy import constants
 
 density_water = 997
 

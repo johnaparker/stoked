@@ -1,9 +1,11 @@
-from stoked import brownian_dynamics, trajectory_animation, drag_sphere
 from functools import partial
+
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import numpy as np
 from scipy.constants import k as kb
+from tqdm import tqdm
+
+from stoked import brownian_dynamics, drag_sphere, trajectory_animation
 
 no_force = None
 
