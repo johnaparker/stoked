@@ -6,6 +6,7 @@ from .hydrodynamics import grand_mobility_matrix, particle_wall_self_mobility
 from .integrators import basic_integrator
 from tqdm import tqdm
 
+
 class trajectory:
     def __init__(self, position, orientation=None):
         self.position = np.asarray(position, dtype=float)
@@ -19,10 +20,12 @@ class trajectory:
         orientation_s = None if self.orientation is None else self.orientation[key]
         return trajectory(self.position[key], orientation_s)
 
+
 class interactions:
     """
     Abstract base class for particle interactions
     """
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -38,7 +41,7 @@ class interactions:
         Return the torque[N,3] based on the current state
         """
         pass
-    
+
     @abstractmethod
     def update(self):
         """
@@ -53,13 +56,29 @@ class interactions:
         self.temperature = temperature
         self.update()
 
+
 class stokesian_dynamics:
     """
     Perform a Stokesian dynamics simulation, with optional external and internal interactions and rotational dynamics
     """
-    def __init__(self, *, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, constraint=None,
-                 interface=None, inertia=None, hydrodynamic_coupling=True, integrator=None):
+
+    def __init__(
+        self,
+        *,
+        temperature,
+        dt,
+        position,
+        drag,
+        orientation=None,
+        force=None,
+        torque=None,
+        interactions=None,
+        constraint=None,
+        interface=None,
+        inertia=None,
+        hydrodynamic_coupling=True,
+        integrator=None,
+    ):
         """
         Arguments:
             temperature        system temperature
@@ -92,10 +111,10 @@ class stokesian_dynamics:
             self.integrator = basic_integrator()
 
         if self.interface is not None and self.ndim != 3:
-            raise ValueError('An interface can only be used in 3-dimensions')
+            raise ValueError("An interface can only be used in 3-dimensions")
 
         if not self.drag.isotropic and self.interface is not None:
-            raise NotImplementedError('anisotropic particles with an interface')
+            raise NotImplementedError("anisotropic particles with an interface")
 
         if orientation is not None:
             self.orientation = np.atleast_1d(np.asarray(orientation, dtype=np.quaternion))
@@ -134,18 +153,18 @@ class stokesian_dynamics:
         self.alpha_T = np.zeros_like(self.position)
         drag_T = self.drag.drag_T
         if self.drag.isotropic and not np.isscalar(drag_T):
-            drag_T = drag_T[:,np.newaxis]
+            drag_T = drag_T[:, np.newaxis]
 
-        self.alpha_T[...] = 1/drag_T
+        self.alpha_T[...] = 1 / drag_T
         self.velocity = np.zeros_like(self.position)
 
         if self.orientation is not None:
             self.alpha_R = np.zeros_like(self.position)
             drag_R = self.drag.drag_R
             if self.drag.isotropic and not np.isscalar(drag_R):
-                drag_R = drag_R[:,np.newaxis]
+                drag_R = drag_R[:, np.newaxis]
 
-            self.alpha_R[...] = 1/drag_R
+            self.alpha_R[...] = 1 / drag_R
             self.angular_velocity = np.zeros_like(self.position)
 
         self.isotropic = self.drag.isotropic and not self.hydrodynamic_coupling
@@ -156,7 +175,7 @@ class stokesian_dynamics:
 
         if self.inertia is not None:
             self.mass = np.empty([self.Nparticles], dtype=float)
-            self.moment = np.empty([self.Nparticles,3], dtype=float)
+            self.moment = np.empty([self.Nparticles, 3], dtype=float)
 
             self.mass[...] = self.inertia.mass
             self.moment[...] = self.inertia.moment
@@ -188,7 +207,7 @@ class stokesian_dynamics:
         else:
             orientation = None
 
-        for i in tqdm(range(Nsteps), desc='Running dynamics', disable=(not progress)):
+        for i in tqdm(range(Nsteps), desc="Running dynamics", disable=(not progress)):
             position[i] = self.position
             if self.rotating:
                 orientation[i] = self.orientation
@@ -211,7 +230,7 @@ class stokesian_dynamics:
         else:
             orientation = None
 
-        with tqdm(desc='Running dynamics until condition is met', disable=(not progress)) as pbar:
+        with tqdm(desc="Running dynamics until condition is met", disable=(not progress)) as pbar:
             while not condition():
                 position.append(np.copy(self.position))
                 if self.rotating:
@@ -264,7 +283,7 @@ class stokesian_dynamics:
 
         if self.interactions is not None:
             pairwise_forces = []
-            for i,I in enumerate(self.interactions):
+            for i, I in enumerate(self.interactions):
                 if isinstance(I, pairwise_central_force):
                     pairwise_forces.append(I)
 
@@ -287,11 +306,25 @@ class stokesian_dynamics:
             else:
                 self.step_func = self.integrator.ld_step
 
-def brownian_dynamics(*, temperature, dt, position, drag, orientation=None, 
-                 force=None, torque=None, interactions=None, constraint=None, interface=None, inertia=None, integrator=None):
+
+def brownian_dynamics(
+    *,
+    temperature,
+    dt,
+    position,
+    drag,
+    orientation=None,
+    force=None,
+    torque=None,
+    interactions=None,
+    constraint=None,
+    interface=None,
+    inertia=None,
+    integrator=None,
+):
     """
     Perform a Brownian dynamics simulation, with optional external and internal interactions and rotational dynamics
-        
+
     Arguments:
         temperature        system temperature
         dt                 time-step
@@ -306,7 +339,18 @@ def brownian_dynamics(*, temperature, dt, position, drag, orientation=None,
         inertia            inertia coefficients of base type stoked.inertia (default: over-damped dynamics)
         integrator         dynamics integrator
     """
-    return stokesian_dynamics(temperature=temperature, dt=dt, position=position, drag=drag,
-                  orientation=orientation, force=force, torque=torque, interactions=interactions,
-                  constraint=constraint, interface=interface, inertia=inertia, hydrodynamic_coupling=False,
-                  integrator=integrator)
+    return stokesian_dynamics(
+        temperature=temperature,
+        dt=dt,
+        position=position,
+        drag=drag,
+        orientation=orientation,
+        force=force,
+        torque=torque,
+        interactions=interactions,
+        constraint=constraint,
+        interface=interface,
+        inertia=inertia,
+        hydrodynamic_coupling=False,
+        integrator=integrator,
+    )

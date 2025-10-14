@@ -1,6 +1,7 @@
 import numpy as np
 import quaternion
 
+
 def constrain_position(x=None, y=None, z=None, idx=None):
     if idx is None:
         idx = np.s_[:]
@@ -19,13 +20,14 @@ def constrain_position(x=None, y=None, z=None, idx=None):
         idy.append(2)
         vals.append(z)
 
-    index = np.s_[idx,idy]
+    index = np.s_[idx, idy]
     vals = np.asarray(vals)
 
     def contraint(position, orientation):
         position[index] = vals
 
     return contraint
+
 
 def constrain_rotation(x=False, y=False, z=False):
     idy = []
@@ -37,7 +39,6 @@ def constrain_rotation(x=False, y=False, z=False):
 
     if z:
         idy.append(2)
-
 
     def contraint(position, orientation):
         for i in range(len(orientation)):

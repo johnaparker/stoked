@@ -2,6 +2,7 @@ import numpy as np
 from stoked import interactions
 from stoked.forces import pairwise_central_force
 
+
 def collisions_sphere(radius, kn):
     def F(r):
         nonlocal radius
@@ -13,15 +14,17 @@ def collisions_sphere(radius, kn):
         T1 = np.add.outer(radius, radius)
 
         overlap = T1 - r
-        overlap[overlap<0] = 0
-        return kn*overlap**1.5
+        overlap[overlap < 0] = 0
+        return kn * overlap**1.5
 
     return pairwise_central_force(F)
+
 
 class collisions_sphere_interface(interactions):
     """
     Collision between spheres and a planar surface using the force model F = kn*overlap^1.5
     """
+
     def __init__(self, radii, kn, zpos=0):
         """
         Arguments:
@@ -42,10 +45,10 @@ class collisions_sphere_interface(interactions):
 
         F = np.zeros_like(self.position)
 
-        dz = self.position[:,2] - self.zpos
+        dz = self.position[:, 2] - self.zpos
         overlap = dz - rad
         idx = overlap < 0
-        F[idx,2] = np.sign(dz[idx])*self.kn*np.sqrt(-overlap[idx])**3
+        F[idx, 2] = np.sign(dz[idx]) * self.kn * np.sqrt(-overlap[idx]) ** 3
 
         return F
 

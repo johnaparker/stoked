@@ -3,7 +3,8 @@ import numpy as np
 
 density_water = 997
 
-def gravity(volume, density, density_medium=density_water, direction=[0,0,-1]):
+
+def gravity(volume, density, density_medium=density_water, direction=[0, 0, -1]):
     direction = np.asarray(direction, dtype=float)
 
     def force(time, position, orientation):
@@ -17,16 +18,18 @@ def gravity(volume, density, density_medium=density_water, direction=[0,0,-1]):
         else:
             den = np.asarray(density, dtype=float)
 
-        mass = vol*(den - density_medium)
-        F = constants.g*mass
+        mass = vol * (den - density_medium)
+        F = constants.g * mass
         return np.outer(F, direction)
 
     return force
 
-def gravity_sphere(radius, density, density_medium=density_water, direction=[0,0,-1]):
-    volume = 4/3*np.pi*radius**3
+
+def gravity_sphere(radius, density, density_medium=density_water, direction=[0, 0, -1]):
+    volume = 4 / 3 * np.pi * radius**3
     return gravity(volume, density, density_medium, direction)
 
-def gravity_ellipsoid(radii, density, density_medium=density_water, direction=[0,0,-1]):
-    volume = 4/3*np.pi*np.product(radii, axis=-1)
+
+def gravity_ellipsoid(radii, density, density_medium=density_water, direction=[0, 0, -1]):
+    volume = 4 / 3 * np.pi * np.product(radii, axis=-1)
     return gravity(volume, density, density_medium, direction)

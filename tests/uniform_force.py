@@ -5,13 +5,15 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 
+
 def uniform_force(t, rvec, orient, Fx):
     F = np.zeros_like(rvec)
-    F[:,0] = Fx
+    F[:, 0] = Fx
     return F
 
+
 def test_uniform_motion():
-    position = [[0,0,0]]
+    position = [[0, 0, 0]]
     drag = drag_sphere(100e-9, 1)
     temperature = 300
     dt = 1e-6
@@ -19,14 +21,16 @@ def test_uniform_motion():
 
     Nsteps = 50000
 
-    history = np.zeros([Nsteps,3], dtype=float)
-    velocity = np.zeros([Nsteps,3], dtype=float)
-    sim = brownian_dynamics(position=position, 
-                            drag=drag,
-                            temperature=temperature,
-                            dt=dt,
-                            force=partial(uniform_force, Fx=Fx),
-                            inertia=stoked.inertia_sphere(100e-9, 10490))
+    history = np.zeros([Nsteps, 3], dtype=float)
+    velocity = np.zeros([Nsteps, 3], dtype=float)
+    sim = brownian_dynamics(
+        position=position,
+        drag=drag,
+        temperature=temperature,
+        dt=dt,
+        force=partial(uniform_force, Fx=Fx),
+        inertia=stoked.inertia_sphere(100e-9, 10490),
+    )
 
     for i in tqdm(range(Nsteps)):
         history[i] = sim.position.squeeze()
@@ -34,16 +38,17 @@ def test_uniform_motion():
         sim.step()
 
     fig, ax = plt.subplots()
-    ax.set_aspect('equal')
-    ax.plot(history[:,0], history[:,1], lw=.5)
+    ax.set_aspect("equal")
+    ax.plot(history[:, 0], history[:, 1], lw=0.5)
 
     fig, ax = plt.subplots()
-    ax.hist(velocity[:,0], bins=100)
+    ax.hist(velocity[:, 0], bins=100)
 
-    v_drift_theory = Fx/(drag.drag_T)
-    v_drift_sim = np.average(velocity[:,0])
+    v_drift_theory = Fx / (drag.drag_T)
+    v_drift_sim = np.average(velocity[:, 0])
     print(v_drift_theory, v_drift_sim)
 
     plt.show()
+
 
 test_uniform_motion()

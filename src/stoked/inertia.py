@@ -1,10 +1,12 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 
+
 class inertia:
     """
     Abstract base class for drag coeffecients
     """
+
     __metaclass__ = ABCMeta
 
     def __init__(self, density, isotropic=False):
@@ -18,11 +20,11 @@ class inertia:
 
     @abstractmethod
     def _mass(self):
-        raise NotImplementedError('mass has not been implemented for this type of particle')
+        raise NotImplementedError("mass has not been implemented for this type of particle")
 
     @abstractmethod
     def _moment(self):
-        raise NotImplementedError('moment has not been implemented for this type of particle')
+        raise NotImplementedError("moment has not been implemented for this type of particle")
 
     @property
     def mass(self):
@@ -50,11 +52,12 @@ class inertia_sphere(inertia):
         self.radius = np.asarray(radius, dtype=float)
 
     def _mass(self):
-        return 4/3*np.pi*self.radius**3*self.density
+        return 4 / 3 * np.pi * self.radius**3 * self.density
 
     def _moment(self):
         M = self.mass
-        return 2/5*M*self.radius**2
+        return 2 / 5 * M * self.radius**2
+
 
 class inertia_ellipsoid(inertia):
     """
@@ -71,13 +74,13 @@ class inertia_ellipsoid(inertia):
         self.radii = np.atleast_2d(np.asarray(radii, dtype=float))
 
     def _mass(self):
-        V = 4/3*np.pi*np.product(self.radii, axis=1)
-        return V*self.density
+        V = 4 / 3 * np.pi * np.product(self.radii, axis=1)
+        return V * self.density
 
     def _moment(self):
         M = self.mass
-        Ix = 1/5*M*(self.radii[:,1]**2 + self.radii[:,2]**2)
-        Iy = 1/5*M*(self.radii[:,0]**2 + self.radii[:,2]**2)
-        Iz = 1/5*M*(self.radii[:,0]**2 + self.radii[:,1]**2)
+        Ix = 1 / 5 * M * (self.radii[:, 1] ** 2 + self.radii[:, 2] ** 2)
+        Iy = 1 / 5 * M * (self.radii[:, 0] ** 2 + self.radii[:, 2] ** 2)
+        Iz = 1 / 5 * M * (self.radii[:, 0] ** 2 + self.radii[:, 1] ** 2)
 
         return np.array([Ix, Iy, Iz]).T

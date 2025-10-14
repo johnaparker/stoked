@@ -4,26 +4,30 @@ from scipy.constants import k as kb
 from stoked.hydrodynamics import particle_wall_self_mobility, grand_mobility_matrix
 import quaternion
 
+
 def fluctuation(friction, temperature, dt):
     """Given a friction matrix, return the fluctuation matrix"""
     if temperature == 0:
         return np.zeros_like(friction)
     else:
-        rhs = 2*kb*temperature*friction/dt
+        rhs = 2 * kb * temperature * friction / dt
         return np.linalg.cholesky(rhs)
 
+
 def random_force_isotropic(alpha, temperature, dt):
-    noise = np.random.normal(size=alpha.shape) 
-    beta = np.sqrt(2*kb*temperature/(alpha*dt))
-    return beta*noise
+    noise = np.random.normal(size=alpha.shape)
+    beta = np.sqrt(2 * kb * temperature / (alpha * dt))
+    return beta * noise
+
 
 def random_force_anisotropic(alpha, temperature, dt):
-    noise = np.random.normal(size=alpha.shape[:2]) 
+    noise = np.random.normal(size=alpha.shape[:2])
     beta = np.zeros_like(alpha)
     for i in range(len(alpha)):
         beta[i] = np.linalg.inv(alpha[i]) @ fluctuation(alpha[i], temperature, dt)
 
-    return np.einsum('Nij,Nj->Ni', beta, noise)
+    return np.einsum("Nij,Nj->Ni", beta, noise)
+
 
 class integrator:
     __metaclass__ = ABCMeta
@@ -82,8 +86,8 @@ class integrator:
 
     def solve_rotation_matrix(self):
         self.rot = quaternion.as_rotation_matrix(self.solver.orientation)
-        self.alpha_T_rot = np.einsum('Nij,Nj,Nlj->Nil', self.rot, self.alpha_T, self.rot)
-        self.alpha_R_rot = np.einsum('Nij,Nj,Nlj->Nil', self.rot, self.alpha_R, self.rot)
+        self.alpha_T_rot = np.einsum("Nij,Nj,Nlj->Nil", self.rot, self.alpha_T, self.rot)
+        self.alpha_R_rot = np.einsum("Nij,Nj,Nlj->Nil", self.rot, self.alpha_R, self.rot)
 
     def _solve_mobility(self):
         if self.solver.interface is not None:
@@ -91,9 +95,11 @@ class integrator:
             M_R = np.copy(self.solver.alpha_R)
             for i in range(self.solver.Nparticles):
                 radius = self.solver.drag.radius[i] if self.solver.drag.radius.ndim else self.solver.drag.radius
-                M_self = particle_wall_self_mobility(self.solver.position[i], self.solver.interface, self.solver.drag.viscosity, radius)
-                M_T[i] -= M_self[0,0].diagonal()
-                M_R[i] -= M_self[1,1].diagonal()
+                M_self = particle_wall_self_mobility(
+                    self.solver.position[i], self.solver.interface, self.solver.drag.viscosity, radius
+                )
+                M_T[i] -= M_self[0, 0].diagonal()
+                M_R[i] -= M_self[1, 1].diagonal()
                 self.alpha_T, self.alpha_R = M_T, M_R
         else:
             self.alpha_T, self.alpha_R = self.solver.alpha_T, self.solver.alpha_R
@@ -101,32 +107,32 @@ class integrator:
     def _solve_grand_mobility(self):
         drag_T = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
         drag_R = np.zeros([self.solver.Nparticles, 3, 3], dtype=float)
-        np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
-        np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+        np.einsum("Nii->Ni", drag_T)[...] = self.alpha_T
+        np.einsum("Nii->Ni", drag_R)[...] = self.alpha_R
 
         self.grand_M = grand_mobility_matrix(self.solver.position, drag_T, drag_R, self.solver.drag.viscosity)
         self.grand_N = fluctuation(self.grand_M, self.solver.temperature, self.dt)
 
         # if self.drag.isotropic:
-            # np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
-            # np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
+        # np.einsum('Nii->Ni', drag_T)[...] = self.alpha_T
+        # np.einsum('Nii->Ni', drag_R)[...] = self.alpha_R
         # else:
-            # rot = quaternion.as_rotation_matrix(orientation)
-            # drag_T[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_T, rot)
-            # drag_R[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_R, rot)
+        # rot = quaternion.as_rotation_matrix(orientation)
+        # drag_T[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_T, rot)
+        # drag_R[...] = np.einsum('Nij,Nj,Nlj->Nil', rot, self.alpha_R, rot)
 
     @abstractmethod
     def bd_step(self):
-        raise NotImplementedError('brownian dynamics step not implemented for this integrator')
+        raise NotImplementedError("brownian dynamics step not implemented for this integrator")
 
     @abstractmethod
     def ld_step(self):
-        raise NotImplementedError('langevin dynamics step not implemented for this integrator')
+        raise NotImplementedError("langevin dynamics step not implemented for this integrator")
 
     @abstractmethod
     def hbd_step(self):
-        raise NotImplementedError('hydrodynamic-brownian dynamics step not implemented for this integrator')
+        raise NotImplementedError("hydrodynamic-brownian dynamics step not implemented for this integrator")
 
     @abstractmethod
     def hld_step(self):
-        raise NotImplementedError('hydrodynamic-langevin dynamics step not implemented for this integrator')
+        raise NotImplementedError("hydrodynamic-langevin dynamics step not implemented for this integrator")
