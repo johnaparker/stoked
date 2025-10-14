@@ -1,0 +1,26 @@
+[project]
+name = "stoked"
+version = "0.4.0"
+description = "Simulation and visualization of Stokesian dynamics for N interacting particles"
+readme = "README.md"
+authors = [
+    { name = "John Parker", email = "johnaparker@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.3",
+    "numpy-quaternion>=2024.0.12",
+    "scipy>=1.16.2",
+    "tqdm>=4.67.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.14.0",
+]
